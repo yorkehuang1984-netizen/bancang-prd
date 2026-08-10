@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>板仓 PedalBoard — 交互式 PRD</title>
+<style>
+  :root {
+    --blue-50: #eff6ff;  --blue-100: #dbeafe;  --blue-200: #bfdbfe;
+    --blue-300: #93c5fd;  --blue-400: #60a5fa;  --blue-500: #3b82f6;
+    --blue-600: #2563eb;  --blue-700: #1d4ed8;  --blue-800: #1e40af;
+    --blue-900: #1e3a8a;
+    --surface: #f0f4ff;
+    --glass-bg: rgba(255,255,255,0.55);
+    --glass-border: rgba(255,255,255,0.6);
+    --glass-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f4ff 30%, #e8f0fe 60%, #dbeafe 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Background decoration */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -180px; right: -120px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -120px; left: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 80px 0 48px;
+  }
+  .hero .badge {
+    display: inline-block;
+    background: var(--blue-100);
+    color: var(--blue-700);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 48px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .hero .subtitle {
+    font-size: 20px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .hero .oneliner {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── Glass card ── */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    padding: 32px;
+    margin-bottom: 28px;
+  }
+
+  /* ── Section title ── */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--blue-600);
+    margin-bottom: 8px;
+  }
+  .section-heading {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+
+  /* ── Prototype grid ── */
+  .proto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  .proto-card {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: var(--radius-md);
+    padding: 24px 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .proto-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(37,99,235,0.12);
+    border-color: var(--blue-300);
+  }
+  .proto-card .icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .proto-card:nth-child(1) .icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  .proto-card:nth-child(2) .icon { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+  .proto-card:nth-child(3) .icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+  .proto-card:nth-child(4) .icon { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+  .proto-card:nth-child(5) .icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .proto-card h4 {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .proto-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .proto-card .tag-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .proto-card .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--blue-50);
+    color: var(--blue-700);
+    font-weight: 600;
+  }
+
+  /* ── PRD card ── */
+  .prd-card {
+    background: linear-gradient(135deg, rgba(30,64,175,0.06), rgba(59,130,246,0.08));
+    border: 1.5px dashed var(--blue-300);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s ease;
+    margin-bottom: 28px;
+  }
+  .prd-card:hover {
+    background: linear-gradient(135deg, rgba(30,64,175,0.1), rgba(59,130,246,0.14));
+    border-color: var(--blue-500);
+  }
+  .prd-card .doc-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .prd-card .doc-info h4 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .prd-card .doc-info p { font-size: 13px; color: var(--text-secondary); }
+  .prd-card .arrow {
+    margin-left: auto;
+    font-size: 20px;
+    color: var(--blue-500);
+    flex-shrink: 0;
+  }
+
+  /* ── Methodology ── */
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .method-item {
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-sm);
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .method-item .label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--blue-600);
+  }
+  .method-item .value {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* ── Deployment ── */
+  .deploy-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .deploy-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .deploy-step .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--blue-600);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .deploy-step .step-body h5 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .deploy-step .step-body p, .deploy-step .step-body code {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .deploy-step .step-body code {
+    background: var(--blue-50);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", "SF Mono", monospace;
+    font-size: 12px;
+    color: var(--blue-700);
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 48px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .hero { padding: 48px 0 32px; }
+    .hero h1 { font-size: 32px; }
+    .hero .subtitle { font-size: 16px; }
+    .proto-grid { grid-template-columns: 1fr; }
+    .glass-card { padding: 20px 16px; }
+    .prd-card { flex-direction: column; text-align: center; }
+    .prd-card .arrow { display: none; }
+    .method-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══ Hero ═══ -->
+  <header class="hero">
+    <div class="badge">交互式 PRD</div>
+    <h1>板仓 PedalBoard</h1>
+    <p class="subtitle">效果器垂直社区 — 从发现设备到交流心得，一站式解决</p>
+    <p class="oneliner">一套面向开发者沟通的交互式产品原型，覆盖 5 个核心页面 + 交互标注 + 完整 PRD</p>
+  </header>
+
+  <!-- ═══ About ═══ -->
+  <div class="glass-card">
+    <div class="section-title">关于这个项目</div>
+    <div class="section-heading">什么是"交互式 PRD"？</div>
+    <p class="section-desc">
+      交互式 PRD 是一种比传统文档更直观的产品沟通方式。它不是可部署的 App，而是<strong>可点击、可交互的高保真原型</strong>，
+      让开发者、面试官或合作者直接在浏览器中体验产品逻辑，比静态 PRD 更生动，比开发 MVP 成本更低。
+    </p>
+    <div class="method-grid">
+      <div class="method-item">
+        <span class="label">原型页面</span>
+        <span class="value">5 个核心界面</span>
+      </div>
+      <div class="method-item">
+        <span class="label">交互标注</span>
+        <span class="value">30+ 开发标注点</span>
+      </div>
+      <div class="method-item">
+        <span class="label">PRD 文档</span>
+        <span class="value">15 章完整规划</span>
+      </div>
+      <div class="method-item">
+        <span class="label">设计系统</span>
+        <span class="value">Glassmorphism + 令牌体系</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Prototypes ═══ -->
+  <div class="glass-card">
+    <div class="section-title">交互原型</div>
+    <div class="section-heading">浏览原型页面</div>
+    <p class="section-desc">每个页面右上角有 "DN" 按钮，点击可查看交互标注和开发说明。</p>
+    <div class="proto-grid">
+      <a href="prototypes/home-glassmorphism.html" class="proto-card" target="_blank">
+        <div class="icon">H</div>
+        <h4>首页 Feed</h4>
+        <p>信息流主页：搜索、Tab 切换（关注/推荐）、帖子卡片（点赞/评论/收藏/更多菜单）</p>
+        <div class="tag-row">
+          <span class="tag">帖子流</span><span class="tag">搜索</span><span class="tag">底部导航</span>
+        </div>
+      </a>
+      <a href="prototypes/discover.html" class="proto-card" target="_blank">
+        <div class="icon">D</div>
+        <h4>发现页</h4>
+        <p>效果器分类卡片、排行榜面板、效果器详情弹窗，核心的"发现→评估→决策"路径</p>
+        <div class="tag-row">
+          <span class="tag">排行榜</span><span class="tag">分类</span><span class="tag">详情弹窗</span>
+        </div>
+      </a>
+      <a href="prototypes/publish-post-flow.html" class="proto-card" target="_blank">
+        <div class="icon">P</div>
+        <h4>发布流程</h4>
+        <p>发帖表单（标题/正文/上传/标签）、表单验证、提交状态、网络失败兜底</p>
+        <div class="tag-row">
+          <span class="tag">表单验证</span><span class="tag">状态机</span><span class="tag">错误处理</span>
+        </div>
+      </a>
+      <a href="prototypes/messages.html" class="proto-card" target="_blank">
+        <div class="icon">M</div>
+        <h4>消息页</h4>
+        <p>互动通知列表（点赞/评论/关注）、私信会话列表（在线状态、未读标记）</p>
+        <div class="tag-row">
+          <span class="tag">通知</span><span class="tag">私信</span><span class="tag">未读标记</span>
+        </div>
+      </a>
+      <a href="prototypes/profile.html" class="proto-card" target="_blank">
+        <div class="icon">U</div>
+        <h4>个人主页</h4>
+        <p>用户资料区（统计/编辑/分享）、三 Tab 切换（帖子/收藏/点赞）、帖子卡片交互</p>
+        <div class="tag-row">
+          <span class="tag">Tab 切换</span><span class="tag">个人数据</span><span class="tag">设置</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══ PRD ═══ -->
+  <a href="prd.html" class="prd-card" target="_blank">
+    <div class="doc-icon">PRD</div>
+    <div class="doc-info">
+      <h4>产品需求文档</h4>
+      <p>15 章完整内容：产品概述、用户分析、竞品分析、MoSCoW 范围、信息架构、用户流程、功能规格、数据模型、社区治理、冷启动策略、成功指标、设计系统、技术约束、风险与开放问题、版本规划</p>
+    </div>
+    <span class="arrow">&#8594;</span>
+  </a>
+
+  <!-- ═══ How to share ═══ -->
+  <div class="glass-card">
+    <div class="section-title">分享 & 展示</div>
+    <div class="section-heading">三种方式把这个项目放进简历</div>
+    <p class="section-desc">推荐方案一或方案二，可以获得一个真正的 URL 链接。</p>
+
+    <div class="deploy-steps">
+
+      <div class="deploy-step" style="border-left: 3px solid #3b82f6; padding-left: 16px;">
+        <div class="step-num" style="background:#3b82f6;">1</div>
+        <div class="step-body">
+          <h5>方案一：GitHub Pages（推荐）</h5>
+          <p>免费、永久、支持自定义域名。在 GitHub 新建仓库 <code>bancang-prd</code>，上传整个项目文件夹，Settings → Pages → 选 main 分支 → 获得 <code>username.github.io/bancang-prd</code> 链接。</p>
+        </div>
+      </div>
+
+      <div class="deploy-step" style="border-left: 3px solid #6366f1; padding-left: 16px;">
+        <div class="step-num" style="background:#6366f1;">2</div>
+        <div class="step-body">
+          <h5>方案二：Netlify Drop（最简单）</h5>
+          <p>打开 <code>app.netlify.com/drop</code>，把整个 <code>板仓</code> 文件夹拖进去，30 秒上线，获得 <code>xxx.netlify.app</code> 链接。无需注册命令行操作。</p>
+        </div>
+      </div>
+
+      <div class="deploy-step" style="border-left: 3px solid #8b5cf6; padding-left: 16px;">
+        <div class="step-num" style="background:#8b5cf6;">3</div>
+        <div class="step-body">
+          <h5>方案三：本地文件夹分享</h5>
+          <p>把整个 <code>板仓</code> 文件夹压缩为 zip，对方解压后打开 <code>index.html</code> 即可浏览全部内容。适合通过微信/邮件发送给面试官。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    板仓 PedalBoard &middot; 交互式 PRD v1.0 &middot; 2026
+  </footer>
+
+</div>
+
+</body>
+</html>

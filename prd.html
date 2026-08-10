@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>板仓 PedalBoard — 产品需求文档</title>
+<style>
+  :root {
+    --blue-50: #eff6ff;  --blue-100: #dbeafe;  --blue-200: #bfdbfe;
+    --blue-300: #93c5fd;  --blue-400: #60a5fa;  --blue-500: #3b82f6;
+    --blue-600: #2563eb;  --blue-700: #1d4ed8;  --blue-800: #1e40af;
+    --surface: #f0f4ff;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --radius-lg: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f4ff 30%, #e8f0fe 60%, #dbeafe 100%);
+    color: var(--text-primary);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -180px; right: -120px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -120px; left: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Back link */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--blue-600);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 32px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .back-link:hover { background: rgba(59,130,246,0.08); }
+
+  /* Content card */
+  .content-card {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    padding: 48px 44px;
+  }
+
+  @media (max-width: 640px) {
+    .content-card { padding: 28px 20px; border-radius: 14px; }
+  }
+
+  /* Typography */
+  h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; background: linear-gradient(135deg, #1e40af, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  h2 { font-size: 22px; font-weight: 700; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--blue-100); color: #1e3a8a; }
+  h3 { font-size: 17px; font-weight: 700; margin: 28px 0 8px; color: #1e40af; }
+  h2:first-of-type { margin-top: 24px; }
+
+  p { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+  strong { color: var(--text-primary); }
+
+  blockquote {
+    border-left: 3px solid var(--blue-400);
+    padding: 8px 16px;
+    margin: 12px 0;
+    background: rgba(59,130,246,0.04);
+    border-radius: 0 8px 8px 0;
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--blue-100);
+    margin: 28px 0;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 20px;
+    font-size: 13px;
+    overflow-x: auto;
+    display: block;
+  }
+  thead { border-bottom: 2px solid var(--blue-200); }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--blue-700);
+    white-space: nowrap;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(59,130,246,0.03); }
+
+  /* Lists */
+  ul { margin: 8px 0 16px; padding-left: 20px; }
+  li { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+  li strong { color: var(--text-primary); }
+
+  /* Code */
+  code {
+    background: var(--blue-50);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", "SF Mono", "Cascadia Code", monospace;
+    font-size: 12px;
+    color: var(--blue-700);
+  }
+
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 18px 20px;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: 12px;
+  }
+
+  /* Footer */
+  .doc-footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--blue-100);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <a href="index.html" class="back-link">&larr; 返回项目首页</a>
+
+  <article class="content-card">
+<h1>板仓 PedalBoard — 产品需求文档（PRD）</h1>
+
+<p><strong>版本</strong>：v1.0 | <strong>日期</strong>：2026-08-10 | <strong>作者</strong>：交互式 PRD（原型驱动）</p>
+<p><strong>状态</strong>：MVP 定义阶段 | <strong>定位</strong>：效果器垂直社区</p>
+
+<hr>
+
+<h2>1. 产品概述</h2>
+
+<h3>1.1 产品定位</h3>
+
+<p>板仓（PedalBoard）是一个<strong>效果器垂直社区平台</strong>。为效果器爱好者、商家和内容创作者提供专属的信息检索、讨论交流和设备展示空间。</p>
+
+<h3>1.2 一句话描述</h3>
+
+<blockquote>效果器爱好者的专属讨论空间 — 从发现设备到交流心得，一站式解决。</blockquote>
+
+<h3>1.3 核心价值主张</h3>
+
+<table>
+<thead><tr>
+<th>用户痛点</th>
+<th>板仓方案</th>
+</tr></thead><tbody>
+<tr>
+<td>效果器讨论分散在微信群、视频评论区、综合论坛</td>
+<td>垂直聚合，按效果器型号归拢所有讨论</td>
+</tr>
+<tr>
+<td>微信聊天记录不可检索，信息快速沉没</td>
+<td>每条帖子永久存在、可被搜索、按效果器归类</td>
+</tr>
+<tr>
+<td>想了解某款效果器，需要跨平台搜索多个来源</td>
+<td>一个效果器一个页面：简介 + 用户评测 + 相关帖子</td>
+</tr>
+<tr>
+<td>买效果器前没有集中的口碑参考</td>
+<td>排行榜 + 真实用户评价 + 未来接入二手市场价格</td>
+</tr>
+</tbody></table>
+
+<h3>1.4 产品愿景</h3>
+
+<ul>
+<li><strong>短期（MVP）</strong>：为效果器爱好者提供可检索的垂直讨论空间，建立首批内容</li>
+<li><strong>中期（V2）</strong>：接入效果器数据库 + 二手交易信息 + KOL 内容生态</li>
+<li><strong>长期（V3）</strong>：成为华语效果器社区的基础设施 — 购买决策、二手估价、设备展示、教程资源</li>
+</ul>
+
+<hr>
+
+<h2>2. 用户分析</h2>
+
+<h3>2.1 目标用户分层</h3>
+
+<table>
+<thead><tr>
+<th>用户类型</th>
+<th>描述</th>
+<th>核心需求</th>
+<th>对平台的价值</th>
+</tr></thead><tbody>
+<tr>
+<td>**普通爱好者**</td>
+<td>拥有 3-15 块效果器，常逛闲鱼/B站/微信群</td>
+<td>了解效果器口碑、对比选择、展示自己的板子</td>
+<td>内容消费 + UGC 生产 + 社区氛围</td>
+</tr>
+<tr>
+<td>**深度玩家**</td>
+<td>拥有大量设备，有改机/DIY 经验，积极参与讨论</td>
+<td>深度技术交流、分享改机经验、建立个人声望</td>
+<td>高质量内容生产 + 社区权威</td>
+</tr>
+<tr>
+<td>**内容创作者（KOL）**</td>
+<td>在 B站/小红书/YouTube 发布效果器相关内容</td>
+<td>内容分发 + 粉丝沉淀 + 变现渠道</td>
+<td>流量引入 + 内容供给</td>
+</tr>
+<tr>
+<td>**官方商家**</td>
+<td>品牌直营或授权经销商</td>
+<td>品牌曝光 + 新品宣发 + 用户触达</td>
+<td>商业变现 + 官方信息权威来源</td>
+</tr>
+<tr>
+<td>**零售琴行**</td>
+<td>线下或线上琴行</td>
+<td>引流获客 + 库存曝光</td>
+<td>商业变现 + 本地化服务</td>
+</tr>
+</tbody></table>
+
+<h3>2.2 用户角色重合原则</h3>
+
+<p>同一用户可同时拥有多重角色。角色不由平台预先分配；由用户行为和社区认可自然形成：</p>
+
+<ul>
+<li><strong>KOL 身份</strong>：由内容质量决定（获赞/收藏/关注数达到阈值），非平台主动授予</li>
+<li><strong>商家认证</strong>：需提交品牌授权证明或营业执照，平台审核后标识为「认证商家」</li>
+<li><strong>平台冷启动期</strong>：可主动邀请其他平台上的效果器博主入驻，但不授予特殊身份标识；其身份同样由后续内容表现决定</li>
+</ul>
+
+<h3>2.3 典型使用场景</h3>
+
+<table>
+<thead><tr>
+<th>场景</th>
+<th>用户路径</th>
+</tr></thead><tbody>
+<tr>
+<td>想买一块延迟效果器，不知道选哪个</td>
+<td>打开板仓 → 发现页 → 延迟排行榜 → 浏览排名 → 点开 DD-8 详情看评测和帖子</td>
+</tr>
+<tr>
+<td>刚买了一块新单块，想晒出来</td>
+<td>首页 → 点 + → 发布帖子 → 上传图片 + 写体验 → 发布成功</td>
+</tr>
+<tr>
+<td>设备出了问题，想求助</td>
+<td>搜索效果器名称 → 找到相关帖子 → 在评论中提问</td>
+</tr>
+<tr>
+<td>想卖掉闲置设备</td>
+<td>未来（V2）：效果器详情页查看二手市场参考价 → 引流至闲鱼</td>
+</tr>
+</tbody></table>
+
+<hr>
+
+<h2>3. 竞品分析</h2>
+
+<table>
+<thead><tr>
+<th>平台</th>
+<th>优势</th>
+<th>对效果器用户的主要缺陷</th>
+</tr></thead><tbody>
+<tr>
+<td>**微信群/QQ 群**</td>
+<td>即时交流、高活跃度</td>
+<td>信息不可检索、不可沉淀、无法按效果器归类</td>
+</tr>
+<tr>
+<td>**吉他中国论坛**</td>
+<td>老牌社区、帖子可检索</td>
+<td>综合音乐论坛，效果器只是子版块；UI 老旧；移动端体验差</td>
+</tr>
+<tr>
+<td>**B站/小红书**</td>
+<td>视频/UGC 生态成熟、流量大</td>
+<td>泛内容平台，效果器内容被算法稀释；评论区不适合深度讨论</td>
+</tr>
+<tr>
+<td>**闲鱼**</td>
+<td>交易数据真实</td>
+<td>非社区，不适合做内容沉淀；交易完成后讨论即结束</td>
+</tr>
+<tr>
+<td>**Equipboard**</td>
+<td>效果器数据库 + 艺术家设备展示</td>
+<td>英文社区，华语用户参与度低；偏展示而非讨论</td>
+</tr>
+<tr>
+<td>**The Gear Page**</td>
+<td>全球最大的设备讨论社区</td>
+<td>全英文；以欧美设备文化为主；需要科学上网</td>
+</tr>
+</tbody></table>
+
+<p><strong>板仓的差异化空间</strong>：华语效果器用户缺少一个<strong>移动优先、可检索、设备导向、中文原生</strong>的垂直讨论空间。</p>
+
+<hr>
+
+<h2>4. MVP 功能范围</h2>
+
+<h3>4.1 功能清单（MoSCoW 优先级）</h3>
+
+<p>#### Must Have（V1 必做）</p>
+
+<table>
+<thead><tr>
+<th>功能</th>
+<th>说明</th>
+<th>原型文件</th>
+</tr></thead><tbody>
+<tr>
+<td>首页 Feed 流</td>
+<td>帖子列表 + 大卡片展示</td>
+<td>`home-glassmorphism.html`</td>
+</tr>
+<tr>
+<td>发现页 — 6 类效果器热度排行</td>
+<td>失真/过载/延迟/混响/周边/综合，点击进入排行榜</td>
+<td>`discover.html`</td>
+</tr>
+<tr>
+<td>排行榜 — 效果器列表</td>
+<td>按热度排序，含效果器名称/品牌/标签/HOT 标记</td>
+<td>`discover.html` — ranking panel</td>
+</tr>
+<tr>
+<td>效果器详情弹窗</td>
+<td>简介 + 该效果器相关帖子</td>
+<td>`discover.html` — bottom sheet modal</td>
+</tr>
+<tr>
+<td>帖子发布流程</td>
+<td>正常发布 / 空内容校验 / 网络失败兜底</td>
+<td>`publish-post-flow.html`</td>
+</tr>
+<tr>
+<td>消息页</td>
+<td>消息列表占位</td>
+<td>`messages.html`</td>
+</tr>
+<tr>
+<td>个人主页</td>
+<td>个人信息 + 我的帖子</td>
+<td>`profile.html`</td>
+</tr>
+<tr>
+<td>底部导航栏</td>
+<td>5 Tab：首页 / 发现 / 发布 / 消息 / 我的</td>
+<td>所有页面</td>
+</tr>
+<tr>
+<td>全局毛玻璃设计系统</td>
+<td>统一的 Token 体系 + 视觉风格</td>
+<td>所有页面 CSS</td>
+</tr>
+</tbody></table>
+
+<p>#### Should Have（V1.1）</p>
+
+<table>
+<thead><tr>
+<th>功能</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td>搜索功能</td>
+<td>前端字符串匹配效果器名称和帖子标题</td>
+</tr>
+<tr>
+<td>评论功能</td>
+<td>帖子详情页评论展示 + 发表评论</td>
+</tr>
+<tr>
+<td>用户注册/登录</td>
+<td>手机号 + 验证码登录</td>
+</tr>
+<tr>
+<td>点赞/收藏</td>
+<td>帖子互动基础功能</td>
+</tr>
+</tbody></table>
+
+<p>#### Could Have（V2）</p>
+
+<table>
+<thead><tr>
+<th>功能</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td>效果器数据库</td>
+<td>结构化效果器信息（品牌/型号/参数/年份）</td>
+</tr>
+<tr>
+<td>二手市场价格参考</td>
+<td>对接闲鱼/淘宝成交数据</td>
+</tr>
+<tr>
+<td>交易引流</td>
+<td>效果器详情页「去闲鱼看看」按钮</td>
+</tr>
+<tr>
+<td>KOL 认证系统</td>
+<td>基于内容质量自动识别 + 手动申请</td>
+</tr>
+<tr>
+<td>商家后台</td>
+<td>认证商家可管理品牌页面、发布新品信息</td>
+</tr>
+</tbody></table>
+
+<p>#### Won't Have（V1 明确不做）</p>
+
+<table>
+<thead><tr>
+<th>功能</th>
+<th>原因</th>
+</tr></thead><tbody>
+<tr>
+<td>即时通讯（IM）</td>
+<td>避免与微信正面竞争；评论已满足异步交流需求</td>
+</tr>
+<tr>
+<td>平台内交易/支付</td>
+<td>无支付牌照和技术能力；采用引流模式</td>
+</tr>
+<tr>
+<td>算法推荐 Feed</td>
+<td>MVP 阶段按时间排序即可，无需推荐系统</td>
+</tr>
+<tr>
+<td>视频/直播</td>
+<td>内容生产门槛和带宽成本过高</td>
+</tr>
+</tbody></table>
+
+<hr>
+
+<h2>5. 信息架构</h2>
+
+<pre><code>
+板仓 App
+├── 首页（Feed 流）
+│   ├── 状态栏
+│   ├── 顶部 Header（Logo + 搜索入口）
+│   ├── 帖子大卡片（热度最高的帖子）
+│   ├── Feed 列表（按时间排序）
+│   └── 底部导航栏
+│
+├── 发现页
+│   ├── 状态栏
+│   ├── Header（Logo + &quot;效果器百科&quot;）
+│   ├── 搜索框
+│   ├── 6 类效果器分类卡片（2×3 网格）
+│   │   ├── 失真 / 过载 / 延迟
+│   │   ├── 混响 / 周边 / 综合
+│   │   └── 每张卡片：图标 + 名称 + 一句话描述 + Top3 效果器
+│   ├── 排行榜面板（点击分类卡片后滑入）
+│   │   ├── 返回按钮 + 分类标题
+│   │   ├── 效果器列表（按热度排序）
+│   │   ├── 每个效果器行：序号 / 名称 / 品牌 / 标签 / HOT 标记
+│   │   └── 点击 → 效果器详情弹窗
+│   ├── 效果器详情弹窗（Bottom Sheet）
+│   │   ├── 拖拽手柄
+│   │   ├── 效果器名称 + 品牌
+│   │   ├── 简介段落
+│   │   └── 相关帖子列表
+│   └── 底部导航栏
+│
+├── 发布流程（独立页面）
+│   ├── 编辑态
+│   │   ├── 标题输入框
+│   │   ├── 正文输入框
+│   │   ├── 关联效果器标签（可选）
+│   │   └── 发布按钮
+│   ├── 校验态
+│   │   └── 空内容 → 红色错误提示
+│   ├── 提交态
+│   │   └── Loading 动画 + 提交中文案
+│   ├── 成功态
+│   │   └── 成功提示 + 自动跳转首页
+│   └── 失败态
+│       └── 网络失败提示 + 重试按钮
+│
+├── 消息页
+│   ├── 消息列表（互动通知 / 系统通知）
+│   └── 暂无消息空状态
+│
+└── 我的（个人主页）
+    ├── 头像 + 用户名 + 简介
+    ├── 统计数据（帖子数 / 获赞数 / 收藏数）
+    ├── 我的帖子列表
+    └── 设置入口
+</code></pre>
+
+<hr>
+
+<h2>6. 核心用户流程</h2>
+
+<h3>6.1 发现 → 评估 → 决策流程</h3>
+
+<pre><code>
+打开板仓首页
+    │
+    ├── 浏览 Feed（随便看看）
+    │
+    └── 点击底部「发现」Tab
+         │
+         ├── 搜索框输入效果器名称（精确搜索）
+         │
+         └── 浏览 6 个分类卡片
+              │
+              └── 点击「失真」分类
+                   │
+                   └── 排行榜滑入
+                        │
+                        ├── 滚动浏览 12 款失真效果器
+                        │    ├── Top 1-3 金/银/铜序号
+                        │    ├── HOT 标记（热度 ≥ 90）
+                        │    └── 品牌 / 标签
+                        │
+                        └── 点击「Boss DS-1」
+                             │
+                             └── Bottom Sheet 弹窗
+                                  ├── 阅读效果器简介
+                                  ├── 浏览 3 篇相关帖子
+                                  └── [V2] 查看二手市场均价
+</code></pre>
+
+<h3>6.2 发布内容流程</h3>
+
+<pre><code>
+首页 → 点击底部蓝色 + 按钮
+    │
+    └── 进入发布页
+         │
+         ├── 填写标题 + 正文 + 选择关联效果器
+         │
+         ├── 点击「发布」
+         │    │
+         │    ├── [内容为空] → 显示错误提示「请填写内容」
+         │    ├── [网络正常] → Loading → 成功提示 → 跳转首页
+         │    └── [网络失败] → 失败提示「网络开小差了」→ 可点击重试
+         │
+         └── 发布成功后帖子出现在首页 Feed 顶部
+</code></pre>
+
+<hr>
+
+<h2>7. 功能规格说明</h2>
+
+<h3>7.1 发现页 — 分类卡片</h3>
+
+<table>
+<thead><tr>
+<th>属性</th>
+<th>规格</th>
+</tr></thead><tbody>
+<tr>
+<td>布局</td>
+<td>2 列 × 3 行网格（CSS Grid）</td>
+</tr>
+<tr>
+<td>每个卡片内容</td>
+<td>渐变色 Icon + 分类名称 + 一句话描述 + Top3 效果器名称</td>
+</tr>
+<tr>
+<td>交互</td>
+<td>点击 → 对应排行榜面板从右侧滑入（300ms ease-out）</td>
+</tr>
+<tr>
+<td>数据来源</td>
+<td>V1：手动维护的 pedalData JSON 对象；V2：后端数据库</td>
+</tr>
+<tr>
+<td>Top3 展示逻辑</td>
+<td>该类目下最具代表性的三款效果器，手动选取，仅展示不可点击</td>
+</tr>
+</tbody></table>
+
+<h3>7.2 排行榜面板</h3>
+
+<table>
+<thead><tr>
+<th>属性</th>
+<th>规格</th>
+</tr></thead><tbody>
+<tr>
+<td>打开动画</td>
+<td>`translateX(105%)` → `translateX(0)`, 300ms cubic-bezier(0, 0, 0.2, 1)</td>
+</tr>
+<tr>
+<td>关闭方式</td>
+<td>点击返回箭头 / 左滑手势（V2）</td>
+</tr>
+<tr>
+<td>渲染策略</td>
+<td>延迟渲染 — 首次打开时生成 DOM，关闭后缓存不复用（`panel._rendered` 标记）</td>
+</tr>
+<tr>
+<td>排序</td>
+<td>按 `hot` 字段降序。hot 值 V1 手动设定（0-100 整数）</td>
+</tr>
+<tr>
+<td>V2 排序算法</td>
+<td>`hot = 帖子数×0.4 + 收藏数×0.3 + 浏览量×0.2 + 近7天互动×0.1`</td>
+</tr>
+<tr>
+<td>排序切换</td>
+<td>V2 添加 SegmentedControl：「按热度」「按时间」</td>
+</tr>
+<tr>
+<td>HOT 标记</td>
+<td>当 `hot >= 90` 时显示红色 HOT 徽章；阈值为可配置参数</td>
+</tr>
+<tr>
+<td>序号样式</td>
+<td>1 金 / 2 银 / 3 铜（渐变色圆形）；4+ 灰色圆形</td>
+</tr>
+<tr>
+<td>效果器行内容</td>
+<td>序号 + 效果器名称 + 品牌名 + 标签（最多 3 个）+ 箭头</td>
+</tr>
+<tr>
+<td>空数据</td>
+<td>显示「暂无数据」（不应出现，但需要兜底）</td>
+</tr>
+</tbody></table>
+
+<h3>7.3 效果器详情弹窗</h3>
+
+<table>
+<thead><tr>
+<th>属性</th>
+<th>规格</th>
+</tr></thead><tbody>
+<tr>
+<td>类型</td>
+<td>Bottom Sheet（底部弹出面板）</td>
+</tr>
+<tr>
+<td>最大高度</td>
+<td>屏幕高度的 65%</td>
+</tr>
+<tr>
+<td>打开动画</td>
+<td>半透明遮罩淡入 + Sheet 从底部滑入（300ms）</td>
+</tr>
+<tr>
+<td>关闭方式</td>
+<td>X 按钮 / 点击遮罩 / 向下拖拽（V2）/ Escape 键</td>
+</tr>
+<tr>
+<td>内容结构</td>
+<td>手柄 → 效果器名称+品牌 → 简介 → 分隔 →「相关帖子」→ 帖子列表</td>
+</tr>
+<tr>
+<td>相关帖子</td>
+<td>仅展示该效果器的帖子（同一 `pedal.posts[]` 数组），不跨效果器推荐</td>
+</tr>
+<tr>
+<td>帖子不足</td>
+<td>若 posts 少于 3 篇，剩余空间留空；不填充无关内容</td>
+</tr>
+<tr>
+<td>零帖子</td>
+<td>显示「暂无相关帖子，成为第一个讨论的人」</td>
+</tr>
+<tr>
+<td>简介缺失</td>
+<td>隐藏简介区块（非必填字段）</td>
+</tr>
+<tr>
+<td>品牌为空</td>
+<td>隐藏品牌行</td>
+</tr>
+</tbody></table>
+
+<h3>7.4 发布帖子流程</h3>
+
+<table>
+<thead><tr>
+<th>状态</th>
+<th>界面表现</th>
+<th>用户可操作</th>
+</tr></thead><tbody>
+<tr>
+<td>**编辑态**</td>
+<td>标题 + 正文输入框 + 关联效果器选择器 + 发布按钮（蓝色）</td>
+<td>自由编辑</td>
+</tr>
+<tr>
+<td>**校验失败**</td>
+<td>红色文字「请填写内容」出现在空字段下方</td>
+<td>修改后重试</td>
+</tr>
+<tr>
+<td>**提交中**</td>
+<td>按钮变为 Loading 动画 + 灰色 + 文字「发布中...」</td>
+<td>不可操作</td>
+</tr>
+<tr>
+<td>**成功**</td>
+<td>绿色对勾动画 + 「发布成功」→ 自动跳转首页</td>
+<td>无需操作</td>
+</tr>
+<tr>
+<td>**失败**</td>
+<td>「网络开小差了，请重试」+ 重试按钮</td>
+<td>点击重试 / 退出</td>
+</tr>
+</tbody></table>
+
+<h3>7.5 底部导航栏</h3>
+
+<table>
+<thead><tr>
+<th>Tab</th>
+<th>图标（Lucide SVG）</th>
+<th>目标页面</th>
+<th>特殊说明</th>
+</tr></thead><tbody>
+<tr>
+<td>首页</td>
+<td>house</td>
+<td>`home-glassmorphism.html`</td>
+<td></td>
+</tr>
+<tr>
+<td>发现</td>
+<td>search</td>
+<td>`discover.html`</td>
+<td>当前页 active 态为蓝色</td>
+</tr>
+<tr>
+<td>**发布**</td>
+<td>**plus（蓝色圆形按钮）**</td>
+<td>`publish-post-flow.html#publish`</td>
+<td>42×42px 蓝底白字，突出于导航栏上方</td>
+</tr>
+<tr>
+<td>消息</td>
+<td>message-circle</td>
+<td>`messages.html`</td>
+<td></td>
+</tr>
+<tr>
+<td>我的</td>
+<td>user</td>
+<td>`profile.html`</td>
+<td></td>
+</tr>
+</tbody></table>
+
+<hr>
+
+<h2>8. 数据模型（MVP）</h2>
+
+<h3>8.1 效果器（Pedal）</h3>
+
+<pre><code>
+{
+  id: string            // 唯一标识，如 &quot;boss-ds-1&quot;
+  name: string          // 产品全称，如 &quot;Boss DS-1 Distortion&quot;
+  brand: string         // 品牌名
+  category: enum        // distortion | overdrive | delay | reverb | modulation | multi
+  tags: string[]        // 标签，如 [&quot;经典&quot;, &quot;入门首选&quot;]
+  hot: number           // 热度值 0-100，V1 手动设定
+  intro: string         // 简介段落（200 字以内）
+  imageUrl?: string     // 产品图（V2）
+  releaseYear?: number  // 发布年份（V2）
+}
+</code></pre>
+
+<h3>8.2 帖子（Post）</h3>
+
+<pre><code>
+{
+  id: string
+  title: string
+  content: string
+  author: { id, name, avatar? }
+  pedalId?: string      // 关联的效果器（可选）
+  likes: number
+  comments: number
+  createdAt: timestamp
+}
+</code></pre>
+
+<hr>
+
+<h2>9. 社区治理规则</h2>
+
+<h3>9.1 社区规则（V1）</h3>
+
+<p>1. <strong>禁止盗版</strong> — 不得发布、销售或宣传盗版/山寨/商标侵权效果器。允许合理讨论复刻电路（Clone），但须明确标注非原厂产品。</p>
+<p>2. <strong>禁止人身攻击</strong> — 不得针对用户进行侮辱、威胁或骚扰。允许真实体验分享，即使是负面的，但不允许恶意品牌攻击（重复刷差评、无事实依据的抹黑）。</p>
+<p>3. <strong>禁止垃圾信息</strong> — 禁止与效果器无关的广告、刷屏、引流外链。</p>
+<p>4. <strong>商家信息披露</strong> — 商家身份用户须在个人简介或帖子中标注商业利益关系。</p>
+
+<h3>9.2 治理原则</h3>
+
+<ul>
+<li>区分「攻击人/品牌」与「评价产品」—— 差评不等于违规，刷差评等于违规</li>
+<li>内容审核优先人工 + 社区举报，避免自动化误伤</li>
+<li>首次违规警告，重复违规封禁</li>
+</ul>
+
+<hr>
+
+<h2>10. 冷启动策略</h2>
+
+<h3>10.1 内容冷启动</h3>
+
+<table>
+<thead><tr>
+<th>策略</th>
+<th>具体做法</th>
+<th>阶段</th>
+</tr></thead><tbody>
+<tr>
+<td>**运营自产**</td>
+<td>官方账号发布效果器介绍帖、对比评测、教程</td>
+<td>上线前→上线初期</td>
+</tr>
+<tr>
+<td>**搬运翻译**</td>
+<td>搬运外网高质量评测内容并翻译（标注原作者和出处；版权归原作者，侵权即删）</td>
+<td>上线初期</td>
+</tr>
+<tr>
+<td>**邀请种子用户**</td>
+<td>邀请 5-10 位效果器圈活跃用户（群主/B站UP主）入驻并承诺内容推荐曝光</td>
+<td>上线前</td>
+</tr>
+<tr>
+<td>**效果器数据库预填充**</td>
+<td>手动录入 60+ 款热门效果器的基本信息</td>
+<td>上线前</td>
+</tr>
+</tbody></table>
+
+<h3>10.2 用户冷启动</h3>
+
+<table>
+<thead><tr>
+<th>策略</th>
+<th>具体做法</th>
+</tr></thead><tbody>
+<tr>
+<td>**微信群引流**</td>
+<td>在现有效果器交流群发布内容链接，将讨论从群聊引导至平台</td>
+</tr>
+<tr>
+<td>**SEO/长尾搜索**</td>
+<td>每篇帖子标题包含效果器型号+关键词，利于搜索引擎收录</td>
+</tr>
+<tr>
+<td>**邀请奖励**</td>
+<td>邀请 3 位好友注册 → 获得「早期用户」标识（V1.1）</td>
+</tr>
+</tbody></table>
+
+<h3>10.3 转型时机判断</h3>
+
+<p>从「搬运驱动」到「UGC 驱动」的转型信号：</p>
+
+<ul>
+<li>UGC 帖子占比超过总帖子的 30%</li>
+<li>单日自发帖子数（非运营发布）超过 10 条</li>
+<li>出现用户自发撰写的效果器对比评测（非邀请内容）</li>
+</ul>
+
+<hr>
+
+<h2>11. 成功指标</h2>
+
+<h3>11.1 北极星指标</h3>
+
+<blockquote><strong>每周活跃内容贡献者数（WAU Contributors）</strong> — 每周至少发布 1 篇帖子或 3 条评论的用户数</blockquote>
+
+<h3>11.2 关键指标</h3>
+
+<table>
+<thead><tr>
+<th>指标</th>
+<th>MVP 目标（上线后 3 个月）</th>
+<th>测量方式</th>
+</tr></thead><tbody>
+<tr>
+<td>注册用户数</td>
+<td>500</td>
+<td>后台统计</td>
+</tr>
+<tr>
+<td>日均帖子发布量</td>
+<td>5</td>
+<td>后台统计</td>
+</tr>
+<tr>
+<td>帖子平均评论数</td>
+<td>3</td>
+<td>后台统计</td>
+</tr>
+<tr>
+<td>效果器数据库覆盖率</td>
+<td>60+ 款效果器</td>
+<td>数据库统计</td>
+</tr>
+<tr>
+<td>次日留存率</td>
+<td>20%</td>
+<td>埋点</td>
+</tr>
+</tbody></table>
+
+<h3>11.3 核心漏斗</h3>
+
+<pre><code>
+打开 App → 浏览首页/发现页 → 点击排行榜 → 查看效果器详情 → 注册/登录 → 发布帖子
+</code></pre>
+
+<p>埋点位置：每个页面进入事件 + 关键按钮点击事件（搜索、分类卡片、效果器详情、发布）</p>
+
+<hr>
+
+<h2>12. 设计系统</h2>
+
+<h3>12.1 设计规范</h3>
+
+<ul>
+<li><strong>设计风格</strong>：Glassmorphism（毛玻璃） + 蓝白主色调</li>
+<li><strong>设计 Token 体系</strong>：3 层架构（Primitive → Semantic → Component），所有颜色/间距/阴影/圆角/动效均 Token 化</li>
+<li><strong>响应式</strong>：Mobile-first，主视口 390×844px（iPhone 14 尺寸），最大宽度 390px + 居中</li>
+<li><strong>动效</strong>：100ms-300ms 范围，cubic-bezier 缓动，需兼容 <code>prefers-reduced-motion</code></li>
+<li><strong>无障碍</strong>：所有交互元素必须有 focus 可见状态 + 最小 24×24px 触控区域</li>
+</ul>
+
+<h3>12.2 原型文件索引</h3>
+
+<table>
+<thead><tr>
+<th>文件</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td>`prototypes/home-glassmorphism.html`</td>
+<td>首页 Feed 流</td>
+</tr>
+<tr>
+<td>`prototypes/discover.html`</td>
+<td>发现页 + 排行榜 + 效果器详情弹窗（含开发交互标注）</td>
+</tr>
+<tr>
+<td>`prototypes/publish-post-flow.html`</td>
+<td>帖子发布流程</td>
+</tr>
+<tr>
+<td>`prototypes/messages.html`</td>
+<td>消息列表</td>
+</tr>
+<tr>
+<td>`prototypes/profile.html`</td>
+<td>个人主页</td>
+</tr>
+</tbody></table>
+
+<h3>12.3 使用交互标注</h3>
+
+<p>在 <code>discover.html</code> 中，点击左下角「DN」按钮开启交互标注模式。界面将出现 8 个编号标记点，点击任意标记可阅读对应元素的开发说明（数据来源、排序逻辑、边缘情况处理等）。再次点击 DN 按钮关闭标注。</p>
+
+<hr>
+
+<h2>13. 技术约束与决策</h2>
+
+<h3>13.1 已知约束</h3>
+
+<ul>
+<li>当前无后端开发能力 → MVP 以交互式原型形式交付，用作开发沟通材料</li>
+<li>无数据库维护能力 → 数据以 JSON 对象硬编码于前端</li>
+<li>无用户系统 → 登录/注册/权限管理标记为 V1.1</li>
+</ul>
+
+<h3>13.2 技术选型建议（供开发团队讨论）</h3>
+
+<ul>
+<li><strong>前端框架</strong>：React 19 + TypeScript + Tailwind v4（项目已有 React-Tailwind 适配器）</li>
+<li><strong>后端</strong>：Node.js / Go，RESTful API</li>
+<li><strong>数据库</strong>：PostgreSQL（用户/帖子/效果器数据）+ Meilisearch（全文搜索）</li>
+<li><strong>图片存储</strong>：阿里云 OSS / AWS S3</li>
+<li><strong>部署</strong>：Vercel（前端）+ 阿里云/腾讯云（后端）</li>
+</ul>
+
+<hr>
+
+<h2>14. 风险与开放问题</h2>
+
+<table>
+<thead><tr>
+<th>风险</th>
+<th>严重度</th>
+<th>缓解措施</th>
+</tr></thead><tbody>
+<tr>
+<td>**冷启动内容不足**</td>
+<td>高</td>
+<td>运营自产 + 搬运翻译过渡 + 种子用户邀请</td>
+</tr>
+<tr>
+<td>**版权纠纷（翻译内容）**</td>
+<td>中</td>
+<td>标注出处、作者可联系下架、逐步转向 UGC</td>
+</tr>
+<tr>
+<td>**社区水化（商家广告泛滥）**</td>
+<td>中</td>
+<td>商家认证 + 商业内容标识 + 社区规则</td>
+</tr>
+<tr>
+<td>**竞品出现**</td>
+<td>低</td>
+<td>垂直深度是壁垒 — 效果器数据的完整性和社区氛围难以复制</td>
+</tr>
+<tr>
+<td>**用户增长缓慢**</td>
+<td>中</td>
+<td>不追求爆发式增长，优先做深内容质量和社区氛围</td>
+</tr>
+</tbody></table>
+
+<h3>14.1 开放待决策问题</h3>
+
+<p>1. KOL 认证的具体数值阈值（赞数/收藏数/关注数）？</p>
+<p>2. 帖子排序是否需要「热门」算法 vs 纯时间序？</p>
+<p>3. 二手交易是平台内完成还是仅引流至闲鱼/淘宝？</p>
+<p>4. 效果器数据库的字段范围（参数规格/试听音频/视频种草）？</p>
+
+<hr>
+
+<h2>15. 版本规划</h2>
+
+<table>
+<thead><tr>
+<th>版本</th>
+<th>时间</th>
+<th>核心交付</th>
+</tr></thead><tbody>
+<tr>
+<td>**V1.0（MVP）**</td>
+<td>当前</td>
+<td>交互式 PRD（5 页原型 + 63 款效果器数据 + 设计系统）</td>
+</tr>
+<tr>
+<td>**V1.1**</td>
+<td>TBD</td>
+<td>可部署前端版本（React）+ 搜索功能 + 评论系统 + 用户注册/登录</td>
+</tr>
+<tr>
+<td>**V2.0**</td>
+<td>TBD</td>
+<td>效果器数据库 + 二手市场数据 + KOL 认证 + 商家后台</td>
+</tr>
+<tr>
+<td>**V3.0**</td>
+<td>TBD</td>
+<td>交易平台 + 视频内容 + 算法推荐 + 国际化</td>
+</tr>
+</tbody></table>
+
+<hr>
+
+<h2>附录 A：交互标注说明</h2>
+
+<p><code>discover.html</code> 内置开发交接标注系统，覆盖以下 5 个交互主题：</p>
+
+<table>
+<thead><tr>
+<th>编号</th>
+<th>标注主题</th>
+<th>涵盖内容</th>
+</tr></thead><tbody>
+<tr>
+<td>1</td>
+<td>搜索框</td>
+<td>当前状态、搜索范围、数据来源、空状态与边缘情况</td>
+</tr>
+<tr>
+<td>2</td>
+<td>分类卡片</td>
+<td>交互流程、数据来源、排序逻辑、Top3 展示</td>
+</tr>
+<tr>
+<td>3</td>
+<td>排行榜面板</td>
+<td>打开/关闭、延迟渲染、排序/切换、HOT 标记、序号样式、空数据</td>
+</tr>
+<tr>
+<td>4</td>
+<td>效果器详情弹窗</td>
+<td>触发方式、内容结构、相关帖子逻辑、关闭方式、数据来源、状态覆盖、V2 规划</td>
+</tr>
+<tr>
+<td>8</td>
+<td>底部导航中心按钮</td>
+<td>交互、样式、路由、V2 权限</td>
+</tr>
+</tbody></table>
+
+<hr>
+
+<h2>附录 B：效果器数据覆盖（V1）</h2>
+
+<p>当前原型包含 6 个分类共 63 款效果器的结构化数据：失真 12 款 / 过载 12 款 / 延迟 11 款 / 混响 10 款 / 周边 10 款 / 综合 8 款。每款效果器含名称、品牌、标签、热度值、简介段落和相关帖子（1-3 篇，含标题/作者/点赞数）。完整数据参见 <code>discover.html</code> 中的 <code>pedalData</code> 对象。</p>
+
+  </article>
+
+  <div class="doc-footer">
+    板仓 PedalBoard &middot; 产品需求文档 v1.0 &middot; 2026
+  </div>
+
+</div>
+
+</body>
+</html>

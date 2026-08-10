@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>板仓 PedalBoard - 我的</title>
+<style>
+/* =====================================================================
+   板仓 PedalBoard · Profile Page ("我的")
+   Glassmorphism theme, built from Figma frame 9:308 ("我的-个人主页")
+   ===================================================================== */
+
+/* ---- CSS Custom Properties (shared token layer) ---- */
+:root {
+  --blue-50:  #b7f7ff;  --blue-100: #abecff;  --blue-200: #93d8ff;
+  --blue-300: #6bb6ff;  --blue-400: #3589ff;  --blue-500: #0870f7;
+  --blue-600: #0041b2;  --blue-700: #002489;  --blue-800: #000969;
+  --blue-900: #00004a;  --blue-950: #040034;
+  --gray-50:  #f9fafb;  --gray-100: #f3f4f6;  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;  --gray-400: #9ca3af;  --gray-500: #6b7280;
+  --gray-600: #4b5563;  --gray-700: #374151;  --gray-800: #1f2937;
+  --gray-900: #111827;  --gray-950: #030712;
+  --green-500: #22c55e; --red-500: #ef4444; --amber-500: #f59e0b;
+  --text-primary: var(--gray-800); --text-secondary: var(--gray-500);
+  --text-tertiary: var(--gray-400); --text-inverse: #ffffff;
+  --border-default: rgba(255,255,255,0.35);
+  --glass-bg-card: rgba(255,255,255,0.62); --glass-bg-nav: rgba(255,255,255,0.72);
+  --glass-bg-header: rgba(255,255,255,0.78);
+  --glass-blur-card: 12px; --glass-blur-nav: 16px; --glass-blur-header: 16px;
+  --glass-border: 1px solid rgba(255,255,255,0.38);
+  --shadow-glass-card: 0 8px 32px rgba(8,112,247,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-glass-card-hover: 0 12px 40px rgba(8,112,247,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-glass-nav: 0 -1px 0 rgba(255,255,255,0.4), 0 -4px 16px rgba(0,0,0,0.04);
+  --radius-card: 16px; --radius-button: 12px; --radius-chip: 20px;
+  --duration-fast: 100ms; --duration-base: 200ms; --duration-moderate: 300ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: "Plus Jakarta Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text-primary); line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; padding: 16px;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(8,112,247,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(107,182,255,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 60% at 50% 80%, rgba(147,216,255,0.08) 0%, transparent 60%),
+    linear-gradient(160deg, #f0f5ff 0%, #f8faff 30%, #f2f6ff 60%, #eef3fc 100%);
+  background-attachment: fixed;
+}
+
+/* Orbs */
+.orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(60px); }
+.orb-1 { width: 320px; height: 320px; background: radial-gradient(circle, rgba(8,112,247,0.18), transparent 70%); top: -80px; left: -60px; }
+.orb-2 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(107,182,255,0.14), transparent 70%); top: 280px; right: -80px; }
+.orb-3 { width: 280px; height: 280px; background: radial-gradient(circle, rgba(147,216,255,0.10), transparent 70%); bottom: 0; left: 20%; }
+
+/* Phone Frame */
+.phone {
+  width: 390px; max-width: 100%; height: 844px; max-height: 90vh;
+  border-radius: 24px; overflow: hidden;
+  display: flex; flex-direction: column; position: relative; z-index: 1;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.5), 0 20px 60px rgba(8,112,247,0.08), 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* Status Bar */
+.status-bar {
+  height: 44px; background: var(--glass-bg-header);
+  backdrop-filter: blur(var(--glass-blur-header));
+  -webkit-backdrop-filter: blur(var(--glass-blur-header));
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; font-size: 12px; font-weight: 600;
+  color: var(--text-primary); flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+.status-bar .time { flex: 1; }
+
+/* ---- Top Bar ---- */
+.top-bar {
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 8px 16px; flex-shrink: 0;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(var(--glass-blur-header));
+  -webkit-backdrop-filter: blur(var(--glass-blur-header));
+  border-bottom: var(--glass-border);
+  position: relative; z-index: 2;
+}
+.top-bar-back {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px; border-radius: 10px; border: none;
+  background: rgba(255,255,255,0.5); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.top-bar-back:hover { background: rgba(8,112,247,0.08); color: var(--blue-500); }
+.top-bar-back:active { transform: translateY(-50%) scale(0.94); }
+.top-bar-back:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500); }
+
+/* ---- More Menu (top bar) ---- */
+.top-more-wrapper { position: relative; }
+.top-more-btn {
+  width: 32px; height: 32px; border-radius: 10px; border: var(--glass-border);
+  background: rgba(255,255,255,0.5); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-primary); font-size: 16px; font-weight: 700;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background var(--duration-fast), color var(--duration-fast), transform var(--duration-fast);
+}
+.top-more-btn:hover { background: rgba(8,112,247,0.08); color: var(--blue-500); }
+.top-more-btn:active { transform: scale(0.92); }
+.top-more-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500); }
+
+.top-more-menu {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: var(--glass-border); border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  min-width: 148px; padding: 4px; display: none; z-index: 30;
+  transform-origin: top right;
+}
+.top-more-menu.open { display: block; animation: menu-enter 180ms var(--ease-out) both; }
+@keyframes menu-enter {
+  from { opacity: 0; transform: scale(0.90) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.top-menu-item {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 10px 12px; border: none; background: none;
+  font-size: 13px; color: var(--text-primary); cursor: pointer;
+  border-radius: 8px; font-family: inherit; text-align: left;
+  transition: background var(--duration-fast);
+}
+.top-menu-item:hover { background: rgba(0,0,0,0.04); }
+.top-menu-item:active { background: rgba(0,0,0,0.08); }
+.top-menu-item:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--blue-500); }
+
+/* ---- User Info Section ---- */
+.user-section {
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  display: flex; flex-direction: column; align-items: center;
+  padding: 28px 20px 20px; flex-shrink: 0;
+  border-bottom: var(--glass-border);
+}
+.user-avatar {
+  width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blue-300), var(--blue-600));
+  box-shadow: 0 4px 20px rgba(8,112,247,0.18);
+  margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: #fff; font-weight: 700;
+}
+.user-name { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.user-bio { font-size: 13px; color: var(--text-tertiary); margin-bottom: 16px; }
+
+.user-stats { display: flex; align-items: center; gap: 0; }
+.user-stat {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 24px; cursor: pointer; border: none; background: none;
+  font-family: inherit;
+  transition: color var(--duration-fast);
+}
+.user-stat:hover { color: var(--blue-500); }
+.user-stat:focus-visible { outline: none; border-radius: 8px; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500); }
+.user-stat:active { transform: scale(0.95); }
+.stat-num { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.user-stat:hover .stat-num { color: var(--blue-500); }
+.stat-label { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+.stat-divider { width: 1px; height: 28px; background: rgba(0,0,0,0.08); flex-shrink: 0; }
+
+/* Action buttons row */
+.user-actions {
+  display: flex; gap: 12px; margin-top: 16px; width: 100%;
+  max-width: 280px;
+}
+.btn-edit-profile {
+  flex: 1; padding: 8px 16px; border-radius: var(--radius-button);
+  border: var(--glass-border); background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  cursor: pointer; font-family: inherit;
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+.btn-edit-profile:hover { background: rgba(8,112,247,0.06); border-color: rgba(8,112,247,0.2); }
+.btn-edit-profile:active { transform: scale(0.97); }
+.btn-edit-profile:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500); }
+
+.btn-share-profile {
+  width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
+  border: var(--glass-border); background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-secondary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.btn-share-profile:hover { background: rgba(8,112,247,0.08); color: var(--blue-500); }
+.btn-share-profile:active { transform: scale(0.92); }
+.btn-share-profile:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500); }
+
+/* ---- Tab Nav ---- */
+.profile-tabs {
+  display: flex; flex-shrink: 0;
+  background: var(--glass-bg-nav);
+  backdrop-filter: blur(var(--glass-blur-nav));
+  -webkit-backdrop-filter: blur(var(--glass-blur-nav));
+  border-bottom: var(--glass-border);
+}
+.profile-tab {
+  flex: 1; text-align: center; padding: 12px 0;
+  font-size: 14px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; border: none; background: none;
+  position: relative;
+  transition: color var(--duration-base) var(--ease-out);
+}
+.profile-tab:hover { color: var(--blue-500); }
+.profile-tab:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500); border-radius: 4px; }
+.profile-tab.active { color: var(--blue-500); font-weight: 600; }
+.profile-tab.active::after {
+  content: ""; position: absolute; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 24px; height: 2.5px; background: var(--blue-500); border-radius: 2px;
+}
+
+/* ---- Content Area ---- */
+.content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+/* ---- Post Card (reused from homepage) ---- */
+.post-card {
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  border: var(--glass-border); border-radius: var(--radius-card);
+  padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  box-shadow: var(--shadow-glass-card); cursor: pointer;
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base);
+  transform: translateZ(0);
+}
+.post-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-glass-card-hover); border-color: rgba(255,255,255,0.55); }
+.post-card:active { transform: scale(0.985); transition: transform var(--duration-fast); }
+.post-card:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500), var(--shadow-glass-card-hover); }
+
+.post-author { display: flex; align-items: center; gap: 10px; }
+.post-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blue-300), var(--blue-500));
+  box-shadow: 0 2px 8px rgba(8,112,247,0.2);
+}
+.post-author-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.post-title { font-size: 15px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+
+.post-cover {
+  width: 100%; height: 140px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(8,112,247,0.06), rgba(107,182,255,0.04));
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,0.4); overflow: hidden;
+}
+.post-cover-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 60%; }
+.post-cover-grid div {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, rgba(8,112,247,0.15), rgba(107,182,255,0.08));
+  border-radius: 6px; border: 1px solid rgba(255,255,255,0.3);
+}
+
+.post-stats { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); }
+.post-badge {
+  font-size: 12px; padding: 3px 10px;
+  background: rgba(8,112,247,0.08); color: var(--blue-500); font-weight: 500;
+  border-radius: var(--radius-chip); border: 1px solid rgba(8,112,247,0.12); white-space: nowrap;
+}
+.post-stats-icons { display: flex; gap: 2px; margin-left: auto; align-items: center; }
+
+/* Stat button (compact, reused) */
+.stat-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 5px 8px; border: none; background: none;
+  color: var(--text-secondary); cursor: pointer;
+  font-size: 13px; font-family: inherit;
+  border-radius: 8px;
+  transition: color var(--duration-fast), background var(--duration-fast), transform var(--duration-fast);
+}
+.stat-btn:hover { color: var(--blue-500); background: rgba(8,112,247,0.06); }
+.stat-btn:active { transform: scale(0.90); }
+.stat-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500); }
+.stat-btn.liked { color: #e0245e; }
+.stat-btn.liked:hover { background: rgba(224,36,94,0.06); }
+.stat-btn.saved { color: var(--amber-500); }
+@keyframes heart-pop {
+  0% { transform: scale(1); } 25% { transform: scale(1.35); } 50% { transform: scale(0.88); } 100% { transform: scale(1); }
+}
+.stat-btn.like-animating svg { animation: heart-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* More btn */
+.more-wrapper { position: relative; }
+.more-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; padding: 0; border: none; background: none; border-radius: 8px;
+  color: var(--text-secondary); cursor: pointer;
+  font-size: 16px; font-weight: 700; letter-spacing: -0.5px;
+  transition: color var(--duration-fast), background var(--duration-fast);
+}
+.more-btn:hover { color: var(--text-primary); background: rgba(0,0,0,0.05); }
+.more-btn:active { background: rgba(0,0,0,0.10); transform: scale(0.92); }
+.more-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--blue-500); }
+
+.card-more-menu {
+  position: absolute; bottom: calc(100% + 6px); right: 0;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: var(--glass-border); border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  min-width: 148px; padding: 4px; display: none; z-index: 20;
+  transform-origin: bottom right;
+}
+.card-more-menu.open { display: block; animation: menu-enter 180ms var(--ease-out) both; }
+
+.card-menu-item {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 10px 12px; border: none; background: none;
+  font-size: 13px; color: var(--text-primary); cursor: pointer;
+  border-radius: 8px; font-family: inherit; text-align: left;
+  transition: background var(--duration-fast);
+}
+.card-menu-item:hover { background: rgba(0,0,0,0.04); }
+.card-menu-item:active { background: rgba(0,0,0,0.08); }
+.card-menu-item.destructive { color: var(--red-500); }
+.card-menu-item.destructive:hover { background: rgba(239,68,68,0.06); }
+
+/* Empty state for 收藏/点赞 tabs */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; color: var(--text-tertiary); text-align: center;
+}
+.empty-state svg { opacity: 0.3; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* Bottom Nav */
+.bottom-nav {
+  display: flex; flex-shrink: 0;
+  background: var(--glass-bg-nav);
+  backdrop-filter: blur(var(--glass-blur-nav));
+  -webkit-backdrop-filter: blur(var(--glass-blur-nav));
+  border-top: var(--glass-border); box-shadow: var(--shadow-glass-nav);
+  padding: 4px 0 env(safe-area-inset-bottom, 4px);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 6px 0 4px; font-size: 10px;
+  color: var(--text-tertiary);
+  cursor: pointer; border: none; background: none;
+  transition: color var(--duration-base), transform var(--duration-fast);
+}
+.nav-item:hover { color: var(--blue-500); }
+.nav-item:active { transform: scale(0.94); }
+.nav-item.active { color: var(--blue-500); font-weight: 600; }
+.nav-item.active:hover { color: var(--blue-500); }
+.nav-icon-svg { width: 22px; height: 22px; transition: transform var(--duration-base); }
+.nav-item.center .nav-icon-svg {
+  width: 42px; height: 42px; background: var(--blue-500); border-radius: 50%;
+  color: #fff; padding: 10px; box-shadow: 0 2px 12px rgba(8,112,247,0.35);
+  margin-top: -16px; box-sizing: content-box;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+  .post-card:hover { transform: none; }
+  .nav-item:active { transform: none; }
+}
+@media (max-width: 420px) {
+  .phone { border-radius: 0; height: 100vh; max-height: 100vh; width: 100%; }
+}
+/* ANNOTATION SYSTEM */
+.anno-toggle { position:absolute;bottom:80px;left:10px;z-index:100;width:30px;height:30px;border-radius:50%;background:#1f2937;color:#f9fafb;border:2px solid rgba(255,255,255,0.6);cursor:pointer;font-size:10px;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.25);transition:background 150ms,transform 150ms,box-shadow 150ms;opacity:0.82;letter-spacing:0.3px; }
+.anno-toggle:hover { opacity:1;transform:scale(1.08);box-shadow:0 6px 20px rgba(0,0,0,0.35); }
+.anno-toggle:active { transform:scale(0.94); }
+.anno-toggle.on { background:#0870f7;border-color:rgba(255,255,255,0.8); }
+.anno-pin { position:absolute;z-index:99;width:20px;height:20px;border-radius:50%;background:#1f2937;color:#f9fafb;font-size:10px;font-weight:700;font-family:inherit;display:none;align-items:center;justify-content:center;cursor:pointer;line-height:1;border:2px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.25);transition:transform 150ms,background 150ms;user-select:none; }
+.anno-pin.visible { display:flex; }
+.anno-pin.active { background:#0870f7;transform:scale(1.2);z-index:101; }
+.anno-tooltip { position:absolute;z-index:102;width:260px;max-width:calc(100vw - 32px);background:#1f2937;color:#f3f4f6;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.55;box-shadow:0 12px 40px rgba(0,0,0,0.35);display:none;pointer-events:auto; }
+.anno-tooltip.visible { display:block; }
+.anno-tooltip .at-num { display:inline-block;width:18px;height:18px;border-radius:50%;background:#0870f7;color:#fff;font-size:10px;font-weight:700;text-align:center;line-height:18px;margin-right:6px; }
+.anno-tooltip .at-title { font-weight:700;font-size:12px;color:#fff;margin-bottom:4px; }
+.anno-tooltip .at-field { color:#9ca3af;font-size:10px;text-transform:uppercase;letter-spacing:0.4px; }
+.anno-tooltip .at-val { color:#d1d5db;font-size:11px;margin-left:2px; }
+.anno-tooltip .at-row { margin-top:3px; }
+.anno-tooltip .at-close { position:absolute;top:6px;right:10px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:16px;line-height:1;padding:2px; }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+
+<div class="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar"><span class="time">9:41</span></div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <button class="top-bar-back" aria-label="返回" onclick="history.back()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="top-more-wrapper">
+      <button class="top-more-btn" aria-label="更多" onclick="toggleTopMenu()">⋯</button>
+      <div class="top-more-menu" id="topMoreMenu">
+        <button class="top-menu-item" onclick="handleTopMenu('history')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          浏览历史
+        </button>
+        <button class="top-menu-item" onclick="handleTopMenu('info')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          个人信息
+        </button>
+        <button class="top-menu-item" onclick="handleTopMenu('settings')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          设置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Info Section -->
+  <div class="user-section">
+    <div class="user-avatar">王</div>
+    <div class="user-name">吉他手小王</div>
+    <div class="user-bio">Strymon 铁粉 / 后摇 &amp; ambient 爱好者</div>
+    <div class="user-stats">
+      <button class="user-stat" onclick="alert('查看关注列表')">
+        <span class="stat-num">128</span>
+        <span class="stat-label">关注</span>
+      </button>
+      <div class="stat-divider"></div>
+      <button class="user-stat" onclick="alert('查看粉丝列表')">
+        <span class="stat-num">356</span>
+        <span class="stat-label">粉丝</span>
+      </button>
+    </div>
+    <div class="user-actions">
+      <button class="btn-edit-profile" onclick="alert('编辑资料')">编辑资料</button>
+      <button class="btn-share-profile" aria-label="分享主页" onclick="alert('分享主页')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Nav -->
+  <div class="profile-tabs">
+    <button class="profile-tab active" onclick="switchProfileTab(this)">帖子</button>
+    <button class="profile-tab" onclick="switchProfileTab(this)">收藏</button>
+    <button class="profile-tab" onclick="switchProfileTab(this)">点赞</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="profileContent">
+
+    <!-- Post Card 1 -->
+    <article class="post-card" onclick="alert('查看帖子详情')">
+      <div class="post-author">
+        <div class="post-avatar"></div>
+        <span class="post-author-name">吉他手小王</span>
+      </div>
+      <div class="post-cover">
+        <div class="post-cover-grid">
+          <div></div><div></div><div></div>
+          <div></div><div></div><div></div>
+          <div></div><div></div><div></div>
+        </div>
+      </div>
+      <h3 class="post-title">我的立体声 ambient 板 - 2026 夏季配置</h3>
+      <div class="post-stats">
+        <span class="post-badge">Ambient</span>
+        <div class="post-stats-icons">
+          <button class="stat-btn liked" onclick="event.stopPropagation();toggleLike(this, 128)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#e0245e" stroke="#e0245e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="stat-count">128</span></button>
+          <button class="stat-btn" onclick="event.stopPropagation();alert('评论')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            47
+          </button>
+          <button class="stat-btn saved" onclick="event.stopPropagation();toggleSave(this, 89)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span class="stat-count">89</span></button>
+          <div class="more-wrapper">
+            <button class="more-btn" aria-label="更多" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+            <div class="card-more-menu">
+              <button class="card-menu-item" onclick="event.stopPropagation();alert('已分享')">分享</button>
+              <button class="card-menu-item" onclick="event.stopPropagation();alert('已复制链接')">复制链接</button>
+              <button class="card-menu-item destructive" onclick="event.stopPropagation();alert('已删除')">删除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Post Card 2 -->
+    <article class="post-card" onclick="alert('查看帖子详情')">
+      <div class="post-author">
+        <div class="post-avatar" style="background:linear-gradient(135deg, var(--blue-400), var(--blue-600));"></div>
+        <span class="post-author-name">吉他手小王</span>
+      </div>
+      <div class="post-cover" style="height:120px;background:linear-gradient(135deg,rgba(8,112,247,0.08),rgba(107,182,255,0.04));">
+        <div class="post-cover-grid" style="grid-template-columns:repeat(4,1fr);width:70%;">
+          <div></div><div></div><div></div><div></div>
+          <div></div><div></div><div></div><div></div>
+        </div>
+      </div>
+      <h3 class="post-title">后摇氛围组 - Strymon + Eventide 信号链分享</h3>
+      <div class="post-stats">
+        <span class="post-badge">Post-Rock</span>
+        <div class="post-stats-icons">
+          <button class="stat-btn" onclick="event.stopPropagation();toggleLike(this, 203)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="stat-count">203</span></button>
+          <button class="stat-btn" onclick="event.stopPropagation();alert('评论')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            82
+          </button>
+          <button class="stat-btn saved" onclick="event.stopPropagation();toggleSave(this, 156)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span class="stat-count">156</span></button>
+          <div class="more-wrapper">
+            <button class="more-btn" aria-label="更多" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+            <div class="card-more-menu">
+              <button class="card-menu-item" onclick="event.stopPropagation();alert('已分享')">分享</button>
+              <button class="card-menu-item" onclick="event.stopPropagation();alert('已复制链接')">复制链接</button>
+              <button class="card-menu-item destructive" onclick="event.stopPropagation();alert('已删除')">删除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav" aria-label="主导航">
+    <button class="nav-item" onclick="location.href='home-glassmorphism.html'">
+      <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      首页
+    </button>
+    <a class="nav-item" href="discover.html">
+      <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      发现
+    </a>
+    <button class="nav-item center" onclick="location.href='publish-post-flow.html'">
+      <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span style="visibility:hidden;height:0;">发布</span>
+    </button>
+    <button class="nav-item" onclick="location.href='messages.html'">
+      <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      消息
+    </button>
+    <button class="nav-item active">
+      <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      我的
+    </button>
+  </nav>
+
+</div>
+
+
+<!-- ANNOTATION PINS -->
+<button class="anno-toggle" id="anno-toggle" title="切换交互标注">DN</button>
+<div class="anno-pin" id="ap1" style="top:50px;left:24px;" data-anno="1">1</div>
+<div class="anno-pin" id="ap2" style="top:50px;right:30px;" data-anno="2">2</div>
+<div class="anno-pin" id="ap3" style="top:155px;left:80px;" data-anno="3">3</div>
+<div class="anno-pin" id="ap4" style="top:220px;left:60px;" data-anno="4">4</div>
+<div class="anno-pin" id="ap5" style="top:360px;right:36px;" data-anno="5">5</div>
+<div class="anno-pin" id="ap6" style="bottom:14px;left:50%;margin-left:-10px;" data-anno="6">6</div>
+<div class="anno-tooltip" id="anno-tooltip">
+  <button class="at-close" id="at-close" aria-label="关闭">&times;</button>
+  <div id="at-content"></div>
+</div>
+<script>
+var annoData={
+  1:{title:"返回按钮 & 更多菜单",zones:[
+    ["返回按钮","onclick='history.back()' — 浏览器后退。无历史记录时无效（V2 增加 href 兜底）。"],
+    ["更多菜单（⋯）","toggleTopMenu() — 弹出 浏览历史/个人信息/设置 三个选项。点击页面其他区域或按 Escape 关闭。"],
+    ["V2 规划","浏览历史 → 独立页面；个人信息 → 编辑表单页；设置 → 设置页（通知/隐私/关于）。"]
+  ]},
+  2:{title:"用户资料区",zones:[
+    ["头像","静态 SVG 占位。V2：用户上传头像 + 裁剪（OSS 存储）。"],
+    ["统计数据","关注 128 / 粉丝 356 — V1 硬编码数字。点击 → alert('查看列表') 占位。V2：实时数据 + 点击进入关注/粉丝列表页。"],
+    ["编辑资料","onclick='alert(\"编辑资料\")' 占位。V2：打开编辑表单（昵称/简介/头像/设备列表）。"],
+    ["分享主页","onclick='alert(\"分享主页\")' 占位。V2：生成分享卡片 + 复制链接。"],
+    ["V2 数据","用户名/简介/设备标签从用户 API 获取。统计数据实时更新。"]
+  ]},
+  3:{title:"Tab 切换（帖子/收藏/点赞）",zones:[
+    ["帖子 Tab（默认）","switchProfileTab(this) — 展示用户发布的帖子列表。V1 硬编码 2 篇帖子 HTML。"],
+    ["收藏 Tab","切换 → 显示空状态 SVG：「还没有收藏任何帖子」。需展示用户收藏的帖子（V2）。"],
+    ["点赞 Tab","切换 → 显示空状态 SVG：「还没有点赞任何帖子」。需展示用户点赞的帖子（V2）。"],
+    ["状态管理","切换时更新 active class + 替换 #profileContent 的 innerHTML。V1 不含数据缓存（切换回帖子 Tab 会 location.reload()，已标记 V2 修复）。"],
+    ["V2 分页","每个 Tab 独立分页，下拉加载更多。"]
+  ]},
+  5:{title:"帖子卡片交互",zones:[
+    ["点赞（红心）","toggleLike(btn, count) — 与首页相同逻辑：切换 filled/unfilled，count ± 1。V1 使用硬编码原始值。V2 对接 API。"],
+    ["评论","event.stopPropagation(); alert('评论') — 占位。V2：打开帖子详情页并滚动至评论区。"],
+    ["收藏（书签）","toggleSave(btn, count) — 与首页相同。"],
+    ["更多菜单（⋯）","toggleCardMenu(this) — 弹出 分享/复制链接/删除。注意：profile 使用 toggleCardMenu 而非首页的 toggleMoreMenu（不同函数名，逻辑一致）。"],
+    ["帖子卡片整体","onclick='alert(\"查看帖子详情\")' — 占位。V2：打开帖子详情页。子按钮使用 event.stopPropagation() 防止冒泡触发卡片点击。"],
+    ["删除操作","仅自己的帖子可删除。V2：显示确认弹窗 + 二次确认。删除后从列表移除 + 不可恢复提示。"]
+  ]},
+  6:{title:"底部导航栏 — 中心发布按钮",zones:[
+    ["交互","onclick='location.href=\"publish-post-flow.html\"'。所有页面一致。"],
+    ["权限（V2）","未登录 → 跳转登录页。被禁言 → 「账号已被禁言」。"]
+  ]}
+};
+(function(){
+var annoOn=false;
+document.getElementById('anno-toggle').addEventListener('click',function(){
+  annoOn=!annoOn;
+  document.querySelectorAll('.anno-pin').forEach(function(p){p.classList.toggle('visible',annoOn);});
+  document.getElementById('anno-toggle').classList.toggle('on',annoOn);
+  if(!annoOn)document.getElementById('anno-tooltip').classList.remove('visible');
+});
+document.querySelectorAll('.anno-pin').forEach(function(pin){
+  pin.addEventListener('click',function(e){
+    e.stopPropagation();
+    document.querySelectorAll('.anno-pin').forEach(function(p){p.classList.remove('active');});
+    pin.classList.add('active');
+    var d=annoData[pin.getAttribute('data-anno')];
+    if(!d)return;
+    var h='<span class="at-num">'+pin.getAttribute('data-anno')+'</span><span class="at-title">'+d.title+'</span>';
+    d.zones.forEach(function(z){h+='<div class="at-row"><span class="at-field">'+z[0]+'</span><br><span class="at-val">'+z[1]+'</span></div>';});
+    document.getElementById('at-content').innerHTML=h;
+    var tip=document.getElementById('anno-tooltip');
+    tip.classList.add('visible');
+    var pr=pin.getBoundingClientRect(),ph=document.querySelector('.phone').getBoundingClientRect();
+    var l=Math.max(8,Math.min(pr.left-ph.left+10,ph.width-268));
+    var t=pr.bottom-ph.top+8;
+    if(t+300>ph.height)t=Math.max(8,pr.top-ph.top-312);
+    tip.style.left=l+'px';tip.style.top=t+'px';
+  });
+});
+document.getElementById('at-close').addEventListener('click',function(e){
+  e.stopPropagation();
+  document.getElementById('anno-tooltip').classList.remove('visible');
+  document.querySelectorAll('.anno-pin').forEach(function(p){p.classList.remove('active');});
+});
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.anno-pin')&&!e.target.closest('.anno-tooltip')&&!e.target.closest('.anno-toggle')){
+    document.getElementById('anno-tooltip').classList.remove('visible');
+    document.querySelectorAll('.anno-pin').forEach(function(p){p.classList.remove('active');});
+  }
+});
+})();
+</script>
+<script>
+/* ---- Top bar more menu ---- */
+function toggleTopMenu() {
+  var menu = document.getElementById('topMoreMenu');
+  menu.classList.toggle('open');
+}
+function handleTopMenu(action) {
+  var labels = { history: '浏览历史', info: '个人信息', settings: '设置' };
+  alert('打开: ' + (labels[action] || action));
+  document.getElementById('topMoreMenu').classList.remove('open');
+}
+
+/* ---- Profile tab switch ---- */
+function switchProfileTab(el) {
+  document.querySelectorAll('.profile-tab').forEach(function (t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  var tab = el.textContent.trim();
+  var content = document.getElementById('profileContent');
+  if (tab === '帖子') {
+    content.innerHTML = document.querySelector('#profileContent').getAttribute('data-posts') || content.innerHTML;
+    // Restore posts view
+    location.reload(); // simple approach for demo
+  } else {
+    content.innerHTML =
+      '<div class="empty-state">' +
+      '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>' +
+      '<p>' + (tab === '收藏' ? '还没有收藏任何帖子' : '还没有点赞任何帖子') + '</p>' +
+      '</div>';
+  }
+}
+
+/* ---- Like toggle ---- */
+function toggleLike(btn, count) {
+  var wasLiked = btn.classList.contains('liked');
+  if (wasLiked) {
+    btn.classList.remove('liked');
+    btn.querySelector('svg').setAttribute('fill', 'none');
+    btn.querySelector('svg').setAttribute('stroke', 'currentColor');
+    updateCount(btn, count);
+  } else {
+    btn.classList.add('liked', 'like-animating');
+    btn.querySelector('svg').setAttribute('fill', '#e0245e');
+    btn.querySelector('svg').setAttribute('stroke', '#e0245e');
+    updateCount(btn, count + 1);
+    btn.addEventListener('animationend', function () { btn.classList.remove('like-animating'); }, { once: true });
+  }
+}
+
+/* ---- Save toggle ---- */
+function toggleSave(btn, count) {
+  var wasSaved = btn.classList.contains('saved');
+  if (wasSaved) {
+    btn.classList.remove('saved');
+    btn.querySelector('svg').setAttribute('fill', 'none');
+    btn.querySelector('svg').setAttribute('stroke', 'currentColor');
+    updateCount(btn, count);
+  } else {
+    btn.classList.add('saved');
+    btn.querySelector('svg').setAttribute('fill', '#f59e0b');
+    btn.querySelector('svg').setAttribute('stroke', '#f59e0b');
+    updateCount(btn, count + 1);
+  }
+}
+
+function updateCount(btn, newCount) {
+  var span = btn.querySelector('.stat-count');
+  if (span) span.textContent = newCount;
+}
+
+/* ---- Card more menu ---- */
+function toggleCardMenu(btn) {
+  var menu = btn.nextElementSibling;
+  var isOpen = menu.classList.contains('open');
+  closeAllCardMenus();
+  if (!isOpen) { menu.classList.add('open'); }
+}
+function closeAllCardMenus() {
+  document.querySelectorAll('.card-more-menu.open').forEach(function (m) { m.classList.remove('open'); });
+}
+
+/* ---- Global click-outside handlers ---- */
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('.more-wrapper')) { closeAllCardMenus(); }
+  if (!e.target.closest('.top-more-wrapper')) { document.getElementById('topMoreMenu').classList.remove('open'); }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    closeAllCardMenus();
+    document.getElementById('topMoreMenu').classList.remove('open');
+  }
+});
+
+// Save initial posts HTML for tab restore
+document.getElementById('profileContent').setAttribute('data-posts', document.getElementById('profileContent').innerHTML);
+</script>
+
+</body>
+</html>

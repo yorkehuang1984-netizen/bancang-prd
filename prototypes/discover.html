@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>板仓 PedalBoard - 发现</title>
+<style>
+/* =====================================================================
+   板仓 PedalBoard · Discover Page
+   - Glassmorphism style matching home-glassmorphism.html
+   - 6 effect pedal category rankings
+   - Pedal detail modals
+   ===================================================================== */
+
+/* ---- CSS Custom Properties (Token Layer) ---- */
+:root {
+  --blue-50:  #b7f7ff;  --blue-100: #abecff;  --blue-200: #93d8ff;
+  --blue-300: #6bb6ff;  --blue-400: #3589ff;  --blue-500: #0870f7;
+  --blue-600: #0041b2;  --blue-700: #002489;  --blue-800: #000969;
+  --blue-900: #00004a;  --blue-950: #040034;
+
+  --gray-50:  #f9fafb;  --gray-100: #f3f4f6;  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;  --gray-400: #9ca3af;  --gray-500: #6b7280;
+  --gray-600: #4b5563;  --gray-700: #374151;  --gray-800: #1f2937;
+  --gray-900: #111827;  --gray-950: #030712;
+
+  --green-500: #22c55e; --green-600: #16a34a;
+  --red-500:   #ef4444; --red-600:   #dc2626;
+  --amber-500: #f59e0b; --amber-600: #d97706;
+  --violet-500:#8b5cf6; --pink-500:  #ec4899;
+  --teal-500:  #14b8a6; --orange-500:#f97316;
+
+  --action-primary:       var(--blue-500);
+  --action-primary-hover: var(--blue-600);
+  --text-primary:         var(--gray-800);
+  --text-secondary:       var(--gray-500);
+  --text-tertiary:        var(--gray-400);
+  --text-inverse:         #ffffff;
+  --border-default:       rgba(255,255,255,0.35);
+  --border-strong:        rgba(255,255,255,0.55);
+  --feedback-error:       var(--red-500);
+  --feedback-success:     var(--green-600);
+
+  --glass-bg-card:        rgba(255,255,255,0.62);
+  --glass-bg-nav:         rgba(255,255,255,0.72);
+  --glass-bg-header:      rgba(255,255,255,0.78);
+  --glass-blur-card:      12px;
+  --glass-blur-nav:       16px;
+  --glass-blur-header:    16px;
+  --glass-border:         1px solid rgba(255,255,255,0.38);
+  --glass-border-strong:  1px solid rgba(255,255,255,0.55);
+
+  --shadow-glass-card:    0 8px 32px rgba(8,112,247,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-glass-card-hover: 0 12px 40px rgba(8,112,247,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-glass-nav:     0 -1px 0 rgba(255,255,255,0.4), 0 -4px 16px rgba(0,0,0,0.04);
+  --shadow-glass-fab:     0 4px 20px rgba(8,112,247,0.30), 0 1px 4px rgba(0,0,0,0.08);
+
+  --radius-card:   16px;
+  --radius-button: 12px;
+  --radius-chip:   20px;
+  --radius-input:  12px;
+
+  --duration-fast:     100ms;
+  --duration-base:     200ms;
+  --duration-moderate: 300ms;
+  --ease-out:          cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out:       cubic-bezier(0.4, 0, 0.2, 1);
+
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+}
+
+/* ---- Reset & Base ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: "Plus Jakarta Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; padding: 16px;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(8,112,247,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(107,182,255,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 60% at 50% 80%, rgba(147,216,255,0.08) 0%, transparent 60%),
+    linear-gradient(160deg, #f0f5ff 0%, #f8faff 30%, #f2f6ff 60%, #eef3fc 100%);
+  background-attachment: fixed;
+}
+
+/* ---- Orbs ---- */
+.orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(60px); will-change: transform;
+}
+.orb-1 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(8,112,247,0.18), transparent 70%);
+  top: -80px; left: -60px;
+}
+.orb-2 {
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(107,182,255,0.14), transparent 70%);
+  top: 280px; right: -80px;
+}
+.orb-3 {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(147,216,255,0.10), transparent 70%);
+  bottom: 0; left: 20%;
+}
+
+/* ---- Phone Frame ---- */
+.phone {
+  width: 390px; max-width: 100%;
+  height: 844px; max-height: 90vh;
+  border-radius: 24px; overflow: hidden;
+  display: flex; flex-direction: column; position: relative; z-index: 1;
+  background: transparent;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 20px 60px rgba(8,112,247,0.08), 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* ---- Status Bar ---- */
+.status-bar {
+  height: 44px;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(var(--glass-blur-header));
+  -webkit-backdrop-filter: blur(var(--glass-blur-header));
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; font-size: 12px; font-weight: 600;
+  color: var(--text-primary); flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+.status-bar .time { flex: 1; }
+.status-bar .icons { display: flex; gap: 6px; align-items: center; }
+.status-bar .icons span {
+  display: inline-block; width: 16px; height: 10px;
+  border: 1.5px solid var(--text-primary); border-radius: 2px; position: relative;
+}
+.status-bar .icons span::after {
+  content: ""; position: absolute; right: -3px; top: 1px;
+  width: 4px; height: 6px; background: var(--text-primary); border-radius: 0 2px 2px 0;
+}
+
+/* ---- Header ---- */
+.discover-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; flex-shrink: 0;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(var(--glass-blur-header));
+  -webkit-backdrop-filter: blur(var(--glass-blur-header));
+  border-bottom: var(--glass-border);
+  position: relative; z-index: 2;
+}
+.discover-header .logo {
+  font-size: 20px; font-weight: 700;
+  color: var(--blue-500); letter-spacing: -0.3px;
+}
+
+/* ---- Search Bar ---- */
+.search-section {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(var(--glass-blur-header));
+  -webkit-backdrop-filter: blur(var(--glass-blur-header));
+  border-bottom: var(--glass-border);
+}
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: var(--glass-border);
+  border-radius: var(--radius-input);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+.search-box:focus-within {
+  border-color: var(--blue-400);
+  box-shadow: 0 0 0 3px rgba(8,112,247,0.12);
+}
+.search-box svg {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+.search-box input {
+  flex: 1; border: none; outline: none; background: transparent;
+  font-size: 15px; color: var(--text-primary);
+  font-family: inherit;
+}
+.search-box input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ---- Scrollable Content ---- */
+.scroll-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 12px 16px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-area::-webkit-scrollbar { width: 0; }
+
+/* ---- Section Title ---- */
+.section-title {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 0;
+}
+
+/* ---- Category Grid ---- */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+/* ---- Category Card ---- */
+.cat-card {
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  border: var(--glass-border);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-glass-card);
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+  position: relative; overflow: hidden;
+  user-select: none;
+}
+.cat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glass-card-hover);
+}
+.cat-card:active {
+  transform: scale(0.97);
+}
+.cat-card .cat-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+  font-weight: 700; font-size: 16px; color: #fff;
+}
+.cat-card .cat-name {
+  font-size: 15px; font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.cat-card .cat-desc {
+  font-size: 11px; color: var(--text-tertiary);
+  line-height: 1.4;
+}
+.cat-card .cat-top3 {
+  margin-top: 8px; font-size: 11px; color: var(--text-secondary);
+  line-height: 1.6;
+}
+.cat-card .cat-top3 span {
+  display: inline-block;
+  background: rgba(8,112,247,0.06);
+  padding: 1px 7px; border-radius: 10px;
+  margin: 0 2px 2px 0;
+  font-weight: 500;
+}
+
+/* Category accent colors */
+.cat-distortion .cat-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.cat-overdrive .cat-icon { background: linear-gradient(135deg, #f97316, #ea580c); }
+.cat-delay .cat-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.cat-reverb .cat-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.cat-modulation .cat-icon { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+.cat-multi .cat-icon { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+
+/* ---- Ranking Panel (slide-in) ---- */
+.ranking-panel {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 10;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex; flex-direction: column;
+  transform: translateX(105%);
+  transition: transform var(--duration-moderate) var(--ease-out);
+  border-radius: 24px; overflow: hidden;
+}
+.ranking-panel.open {
+  transform: translateX(0);
+}
+
+.ranking-header {
+  display: flex; align-items: center;
+  padding: 12px 16px;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(var(--glass-blur-header));
+  -webkit-backdrop-filter: blur(var(--glass-blur-header));
+  border-bottom: var(--glass-border);
+  gap: 10px;
+}
+.ranking-header .back-btn {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(8px);
+  border: var(--glass-border);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  transition: background var(--duration-fast), color var(--duration-fast);
+  flex-shrink: 0;
+}
+.ranking-header .back-btn:hover { background: rgba(8,112,247,0.08); color: var(--blue-500); }
+.ranking-header .back-btn:active { transform: scale(0.94); }
+.ranking-header .ranking-title {
+  font-size: 16px; font-weight: 700;
+  color: var(--text-primary);
+}
+.ranking-header .ranking-subtitle {
+  font-size: 12px; color: var(--text-tertiary);
+}
+
+.ranking-list {
+  flex: 1; overflow-y: auto; padding: 8px 16px 16px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ranking-list::-webkit-scrollbar { width: 0; }
+
+/* ---- Pedal Row ---- */
+.pedal-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px;
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  border: var(--glass-border);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+  user-select: none;
+}
+.pedal-row:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glass-card-hover);
+}
+.pedal-row:active { transform: scale(0.98); }
+
+.pedal-rank {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+  color: #fff;
+}
+.pedal-rank.top1 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.pedal-rank.top2 { background: linear-gradient(135deg, #94a3b8, #64748b); }
+.pedal-rank.top3 { background: linear-gradient(135deg, #cd853f, #a0522d); }
+.pedal-rank.normal { background: rgba(0,0,0,0.15); color: var(--text-secondary); font-size: 11px; }
+
+.pedal-info { flex: 1; min-width: 0; }
+.pedal-info .pedal-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.pedal-info .pedal-brand { font-size: 11px; color: var(--text-tertiary); }
+.pedal-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+.pedal-tag {
+  font-size: 10px; padding: 1px 6px; border-radius: 8px;
+  background: rgba(8,112,247,0.08); color: var(--blue-500);
+  font-weight: 500;
+}
+
+.pedal-stats {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  font-size: 11px; color: var(--text-tertiary);
+}
+.pedal-stats .hot-badge {
+  font-size: 10px; padding: 2px 7px; border-radius: 8px;
+  background: rgba(239,68,68,0.1); color: var(--red-500);
+  font-weight: 600;
+}
+
+/* ---- Detail Modal ---- */
+.modal-overlay {
+  position: absolute; inset: 0; z-index: 20;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--duration-moderate) var(--ease-out);
+  border-radius: 24px; overflow: hidden;
+}
+.modal-overlay.open {
+  opacity: 1; pointer-events: auto;
+}
+
+.modal-sheet {
+  width: 100%; max-height: 65%;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px 20px 24px 24px;
+  display: flex; flex-direction: column;
+  transform: translateY(100%);
+  transition: transform var(--duration-moderate) var(--ease-out);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
+}
+.modal-overlay.open .modal-sheet {
+  transform: translateY(0);
+}
+
+.modal-handle {
+  width: 36px; height: 4px; background: var(--gray-300);
+  border-radius: 2px; margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+.modal-header {
+  padding: 14px 20px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.modal-header .modal-pedal-name { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.modal-header .modal-pedal-brand { font-size: 12px; color: var(--text-tertiary); }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(0,0,0,0.04);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  transition: background var(--duration-fast);
+  flex-shrink: 0;
+}
+.modal-close:hover { background: rgba(0,0,0,0.08); }
+.modal-close:active { transform: scale(0.94); }
+
+.modal-body {
+  flex: 1; overflow-y: auto; padding: 0 20px 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.modal-body::-webkit-scrollbar { width: 0; }
+
+.modal-intro {
+  font-size: 13px; color: var(--text-secondary);
+  line-height: 1.7;
+  background: rgba(255,255,255,0.4);
+  border-radius: var(--radius-card);
+  padding: 12px 14px;
+}
+
+.modal-section-title {
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.related-post {
+  padding: 10px 12px;
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  border: var(--glass-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform var(--duration-fast);
+}
+.related-post:hover { transform: translateY(-1px); }
+.related-post:active { transform: scale(0.98); }
+.related-post .rp-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.related-post .rp-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* ---- Bottom Nav ---- */
+.bottom-nav {
+  height: 72px;
+  background: var(--glass-bg-nav);
+  backdrop-filter: blur(var(--glass-blur-nav));
+  -webkit-backdrop-filter: blur(var(--glass-blur-nav));
+  border-top: var(--glass-border);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 12px; padding-top: 6px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-glass-nav);
+  position: relative; z-index: 2;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; padding: 4px 0;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 10px; font-weight: 500;
+  transition: color var(--duration-fast) var(--ease-out);
+  font-family: inherit;
+  text-decoration: none;
+}
+.nav-item.active { color: var(--blue-500); }
+.nav-item:hover { color: var(--blue-500); }
+.nav-item.center .nav-icon-svg {
+  width: 42px; height: 42px;
+  background: var(--blue-500);
+  border-radius: 50%;
+  color: #fff;
+  padding: 10px;
+  box-shadow: var(--shadow-glass-fab);
+  margin-top: -16px;
+  box-sizing: content-box;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+.nav-item.center:hover .nav-icon-svg { transform: scale(1.06); }
+.nav-item.center:active .nav-icon-svg { transform: scale(0.94); }
+
+/* ==================================================================
+   ANNOTATION SYSTEM — Developer Handoff Layer
+   Toggle with the "DEV NOTES" button at the bottom-left of the phone.
+   ================================================================== */
+.anno-toggle {
+  position: absolute; bottom: 80px; left: 10px; z-index: 100;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #1f2937; color: #f9fafb;
+  border: 2px solid rgba(255,255,255,0.6);
+  cursor: pointer;
+  font-size: 10px; font-weight: 700; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: background 150ms, transform 150ms, box-shadow 150ms;
+  opacity: 0.82; letter-spacing: 0.3px;
+}
+.anno-toggle:hover  { opacity: 1; transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+.anno-toggle:active { transform: scale(0.94); }
+.anno-toggle.on     { background: #0870f7; border-color: rgba(255,255,255,0.8); }
+
+/* Pin — numbered circle near an interaction zone */
+.anno-pin {
+  position: absolute; z-index: 99;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #1f2937; color: #f9fafb;
+  font-size: 10px; font-weight: 700; font-family: inherit;
+  display: none; align-items: center; justify-content: center;
+  cursor: pointer; line-height: 1;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  transition: transform 150ms, background 150ms;
+  user-select: none;
+}
+.anno-pin.visible   { display: flex; }
+.anno-pin.active    { background: #0870f7; transform: scale(1.2); z-index: 101; }
+
+/* Tooltip card — appears near the active pin */
+.anno-tooltip {
+  position: absolute; z-index: 102;
+  width: 260px; max-width: calc(100vw - 32px);
+  background: #1f2937; color: #f3f4f6;
+  border-radius: 12px; padding: 12px 14px;
+  font-size: 12px; line-height: 1.55;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  display: none;
+  pointer-events: auto;
+}
+.anno-tooltip.visible { display: block; }
+
+.anno-tooltip .at-num {
+  display: inline-block; width: 18px; height: 18px; border-radius: 50%;
+  background: #0870f7; color: #fff; font-size: 10px; font-weight: 700;
+  text-align: center; line-height: 18px; margin-right: 6px;
+}
+.anno-tooltip .at-title {
+  font-weight: 700; font-size: 12px; color: #fff; margin-bottom: 4px;
+}
+.anno-tooltip .at-field {
+  color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.anno-tooltip .at-val {
+  color: #d1d5db; font-size: 11px; margin-left: 2px;
+}
+.anno-tooltip .at-row {
+  margin-top: 3px;
+}
+.anno-tooltip .at-close {
+  position: absolute; top: 6px; right: 10px;
+  background: none; border: none; color: #9ca3af; cursor: pointer;
+  font-size: 16px; line-height: 1; padding: 2px;
+}
+.nav-icon-svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeInUp var(--duration-moderate) var(--ease-out) forwards; }
+</style>
+</head>
+<body>
+
+<!-- Decorative Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="icons">
+      <span style="width:14px;height:10px;"></span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="discover-header">
+    <span class="logo">板仓</span>
+    <span style="font-size:12px;color:var(--text-tertiary);">效果器百科</span>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <div class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" placeholder="搜索效果器、品牌、帖子..." aria-label="搜索">
+    </div>
+  </div>
+
+  <!-- Scrollable Content -->
+  <div class="scroll-area">
+
+    <div class="section-title">效果器热度排行</div>
+
+    <div class="category-grid">
+      <!-- 失真 -->
+      <div class="cat-card cat-distortion" onclick="openRanking('distortion')">
+        <div class="cat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10h-10V2z"/></svg>
+        </div>
+        <div class="cat-name">失真</div>
+        <div class="cat-desc">经典法兹到现代高增益</div>
+        <div class="cat-top3">
+          <span>Boss DS-1</span><span>ProCo RAT</span><span>MT-2</span>
+        </div>
+      </div>
+
+      <!-- 过载 -->
+      <div class="cat-card cat-overdrive" onclick="openRanking('overdrive')">
+        <div class="cat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+        </div>
+        <div class="cat-name">过载</div>
+        <div class="cat-desc">温暖破开到推子神器</div>
+        <div class="cat-top3">
+          <span>Ibanez TS808</span><span>Boss SD-1</span><span>Klon</span>
+        </div>
+      </div>
+
+      <!-- 延迟 -->
+      <div class="cat-card cat-delay" onclick="openRanking('delay')">
+        <div class="cat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="cat-name">延迟</div>
+        <div class="cat-desc">数字精准到模拟暖声</div>
+        <div class="cat-top3">
+          <span>Boss DD-8</span><span>Timeline</span><span>Carbon Copy</span>
+        </div>
+      </div>
+
+      <!-- 混响 -->
+      <div class="cat-card cat-reverb" onclick="openRanking('reverb')">
+        <div class="cat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h2"/><path d="M6 8h2"/><path d="M10 5h2"/><path d="M14 8h2"/><path d="M18 12h2"/></svg>
+        </div>
+        <div class="cat-name">混响</div>
+        <div class="cat-desc">弹簧到大教堂空间感</div>
+        <div class="cat-top3">
+          <span>Strymon BigSky</span><span>Boss RV-6</span><span>BlueSky</span>
+        </div>
+      </div>
+
+      <!-- 周边 -->
+      <div class="cat-card cat-modulation" onclick="openRanking('modulation')">
+        <div class="cat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"/><path d="M12 2v20"/><path d="m4.93 4.93 14.14 14.14"/><path d="m19.07 4.93-14.14 14.14"/></svg>
+        </div>
+        <div class="cat-name">周边</div>
+        <div class="cat-desc">合唱、相位、镶边与颤音</div>
+        <div class="cat-top3">
+          <span>Boss CE-2W</span><span>Phase 90</span><span>Julia</span>
+        </div>
+      </div>
+
+      <!-- 综合 -->
+      <div class="cat-card cat-multi" onclick="openRanking('multi')">
+        <div class="cat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="cat-name">综合</div>
+        <div class="cat-desc">建模、IR 与全能工作站</div>
+        <div class="cat-top3">
+          <span>HX Stomp</span><span>Quad Cortex</span><span>GT-1000</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:12px;"></div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav" aria-label="主导航">
+    <a class="nav-item" href="home-glassmorphism.html">
+      <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      首页
+    </a>
+    <span class="nav-item active" onclick="return false;">
+      <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      发现
+    </span>
+    <a class="nav-item center" href="publish-post-flow.html#publish">
+      <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span style="visibility:hidden;height:0;">发布</span>
+    </a>
+    <a class="nav-item" href="messages.html">
+      <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      消息
+    </a>
+    <a class="nav-item" href="profile.html">
+      <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      我的
+    </a>
+  </nav>
+
+<!-- Ranking Panels (one per category) -->
+<div class="ranking-panel" id="panel-distortion">
+  <div class="ranking-header">
+    <button class="back-btn" onclick="closeRanking('distortion')" aria-label="返回">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div>
+      <div class="ranking-title">失真类效果器</div>
+      <div class="ranking-subtitle">人气热度排行</div>
+    </div>
+  </div>
+  <div class="ranking-list" id="list-distortion"></div>
+</div>
+
+<div class="ranking-panel" id="panel-overdrive">
+  <div class="ranking-header">
+    <button class="back-btn" onclick="closeRanking('overdrive')" aria-label="返回">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div>
+      <div class="ranking-title">过载类效果器</div>
+      <div class="ranking-subtitle">人气热度排行</div>
+    </div>
+  </div>
+  <div class="ranking-list" id="list-overdrive"></div>
+</div>
+
+<div class="ranking-panel" id="panel-delay">
+  <div class="ranking-header">
+    <button class="back-btn" onclick="closeRanking('delay')" aria-label="返回">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div>
+      <div class="ranking-title">延迟类效果器</div>
+      <div class="ranking-subtitle">人气热度排行</div>
+    </div>
+  </div>
+  <div class="ranking-list" id="list-delay"></div>
+</div>
+
+<div class="ranking-panel" id="panel-reverb">
+  <div class="ranking-header">
+    <button class="back-btn" onclick="closeRanking('reverb')" aria-label="返回">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div>
+      <div class="ranking-title">混响类效果器</div>
+      <div class="ranking-subtitle">人气热度排行</div>
+    </div>
+  </div>
+  <div class="ranking-list" id="list-reverb"></div>
+</div>
+
+<div class="ranking-panel" id="panel-modulation">
+  <div class="ranking-header">
+    <button class="back-btn" onclick="closeRanking('modulation')" aria-label="返回">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div>
+      <div class="ranking-title">周边类效果器</div>
+      <div class="ranking-subtitle">人气热度排行</div>
+    </div>
+  </div>
+  <div class="ranking-list" id="list-modulation"></div>
+</div>
+
+<div class="ranking-panel" id="panel-multi">
+  <div class="ranking-header">
+    <button class="back-btn" onclick="closeRanking('multi')" aria-label="返回">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div>
+      <div class="ranking-title">综合类效果器</div>
+      <div class="ranking-subtitle">人气热度排行</div>
+    </div>
+  </div>
+  <div class="ranking-list" id="list-multi"></div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="pedal-modal" onclick="closePedalModal(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-pedal-name" id="modal-name"></div>
+        <div class="modal-pedal-brand" id="modal-brand"></div>
+      </div>
+      <button class="modal-close" onclick="closePedalModal()" aria-label="关闭">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ==================================================================
+     ANNOTATION PINS — inside phone, positioned absolute.
+     Toggle with "DN" button.  Click a pin to see the note.
+     ================================================================== -->
+<button class="anno-toggle" id="anno-toggle" title="切换交互标注" aria-label="切换交互标注">DN</button>
+<div class="anno-pin" id="ap1" style="top:114px;right:24px;" data-anno="1">1</div>
+<div class="anno-pin" id="ap2" style="top:195px;left:22px;" data-anno="2">2</div>
+<div class="anno-pin" id="ap3" style="top:248px;left:88px;" data-anno="3">3</div>
+<div class="anno-pin" id="ap4" style="top:56px;right:40px;" data-anno="3">4</div>
+<div class="anno-pin" id="ap5" style="top:78px;left:16px;" data-anno="3">5</div>
+<div class="anno-pin" id="ap6" style="top:78px;right:32px;" data-anno="3">6</div>
+<div class="anno-pin" id="ap7" style="bottom:140px;left:16px;" data-anno="4">7</div>
+<div class="anno-pin" id="ap8" style="bottom:14px;left:50%;margin-left:-10px;" data-anno="8">8</div>
+<div class="anno-tooltip" id="anno-tooltip">
+  <button class="at-close" id="at-close" aria-label="关闭">&times;</button>
+  <div id="at-content"></div>
+</div>
+</div><!-- /phone -->
+
+<script>
+/* =====================================================================
+   ANNOTATION SYSTEM — Developer Handoff Notes
+   Toggle: click "DN" button.  Click numbered pins to read notes.
+   ===================================================================== */
+var annoData = {
+  1: { title:"搜索框", zones:[
+    ["当前状态","占位 UI，搜索功能待开发。点击输入框获得焦点，键盘弹出但无实际检索逻辑。"],
+    ["搜索范围","效果器名称、品牌名、帖子标题。V1 仅做前端字符串匹配；V2 接入后端全文索引。"],
+    ["数据来源","站内帖子 + 效果器数据库。索引由后端 Elasticsearch / Meilisearch 构建，前端调 search API。"],
+    ["空状态 & 边缘情况","1) 无匹配结果 → 展示「未找到相关结果」+ 推荐 3 个热门效果器。2) 输入<2 字符 → 不触发搜索。3) 特殊字符 → 做 escape 处理。4) 网络失败 → 「搜索暂不可用，请稍后重试」。"]
+  ]},
+  2: { title:"分类卡片（以失真为例）", zones:[
+    ["交互流程","点击卡片 → 对应排行榜面板从右侧滑入（transform: translateX, 300ms ease-out）。"],
+    ["数据来源","pedalData 对象，目前手动维护 63 款效果器的 JSON 数据。V1 由运营人员通过后台录入；V2 对接数据库。"],
+    ["排序逻辑","按 hot 字段降序排列。hot 值手动设定（0-100）。V2 改为算法计算：帖子数 × 0.4 + 收藏数 × 0.3 + 浏览量 × 0.2 + 近 7 天互动 × 0.1。"],
+    ["Top3 展示","每个卡片底部显示该类目下三款代表效果器名称，手动选取。仅展示，不可点击。"]
+  ]},
+  3: { title:"排行榜面板", zones:[
+    ["打开/关闭","点击分类卡片 → panel.classList.add('open') → translateX(0)。点击返回箭头或左滑 → translateX(105%)。关闭后状态保留（已渲染的 DOM 不销毁）。"],
+    ["延迟渲染","首次打开时调用 renderRanking(cat) 生成 DOM，之后缓存复用（panel._rendered = true）。6 个类目共 63 条数据，单独渲染避免首屏加载过重。"],
+    ["排序","当前按 hot 值降序（同分类卡片）。支持两种模式切换（V2 实现）：「按热度」「按时间」。切换控件见排行榜标题栏右侧（待添加 SegmentedControl）。"],
+    ["HOT 标记","hot >= 90 的效果器名称右侧显示红色 HOT 徽章。阈值可在后台配置。"],
+    ["排行序号样式","前 3 名分别使用金/银/铜渐变色圆形序号。第 4 名起使用灰色圆形序号。"],
+    ["空数据","若分类下无效果器（不应出现），显示「暂无数据」。"]
+  ]},
+  4: { title:"效果器详情弹窗（Bottom Sheet）", zones:[
+    ["触发","点击排行榜中任一效果器行 → openPedalModal(cat, index)。"],
+    ["内容结构","效果器名称 + 品牌 → 简介段落 → 「相关帖子」区块。"],
+    ["相关帖子","仅展示该效果器的帖子（同一 pedals.posts 数组），不跨效果器推荐。若 posts 不足 3 篇，下方留空，不填充无关内容。"],
+    ["关闭方式","1) 点击右上角 X 按钮。2) 点击半透明遮罩层（overlay）。3) 向下拖拽 sheet（V2 实现手势关闭）。4) 按 Escape 键。"],
+    ["数据来源","pedalData[cat][index] 的 intro + posts 字段。帖子数据含 title / author / likes，不含正文。V2 接入真实帖子 API。"],
+    ["状态覆盖","无相关帖子时：「暂无相关帖子，成为第一个讨论的人」。简介缺失时：不展示简介区块。品牌为空时：不展示品牌行。"],
+    ["V2 规划","1) 添加「我拥有」「我想买」按钮。2) 展示二手市场均价（对接闲鱼/淘宝数据）。3) 相关视频（B站嵌入）。"]
+  ]},
+  8: { title:"底部导航栏 — 中心发布按钮", zones:[
+    ["交互","点击 → 跳转 publish-post-flow.html#publish。所有页面此按钮行为一致。"],
+    ["样式","SVG 自绘蓝色圆形按钮（42×42px），使用 --blue-500 背景 + --shadow-glass-fab 投影。hover 放大 1.06x，active 缩小 0.94x。"],
+    ["路由","发布流程为独立页面（非弹窗），原因：发布是核心操作，需要全屏专注输入体验。"],
+    ["权限（V2）","未登录用户点击 → 跳转登录页。已登录但被禁言 → 提示「账号已被禁言」。"]
+  ]}
+};
+
+// Toggle
+var annoOn = false;
+document.getElementById('anno-toggle').addEventListener('click',function(){
+  annoOn = !annoOn;
+  var pins = document.querySelectorAll('.anno-pin');
+  var btn = document.getElementById('anno-toggle');
+  pins.forEach(function(p){ p.classList.toggle('visible', annoOn); });
+  btn.classList.toggle('on', annoOn);
+  if (!annoOn) { document.getElementById('anno-tooltip').classList.remove('visible'); }
+});
+
+// Pin click
+document.querySelectorAll('.anno-pin').forEach(function(pin){
+  pin.addEventListener('click',function(e){
+    e.stopPropagation();
+    // deactivate all
+    document.querySelectorAll('.anno-pin').forEach(function(p){ p.classList.remove('active'); });
+    // activate this
+    pin.classList.add('active');
+    var num = pin.getAttribute('data-anno');
+    var d = annoData[num];
+    if (!d) return;
+    var html = '<span class="at-num">'+num+'</span><span class="at-title">'+d.title+'</span>';
+    d.zones.forEach(function(z){
+      html += '<div class="at-row"><span class="at-field">'+z[0]+'</span><br><span class="at-val">'+z[1]+'</span></div>';
+    });
+    document.getElementById('at-content').innerHTML = html;
+    var tip = document.getElementById('anno-tooltip');
+    tip.classList.add('visible');
+    // Position tooltip
+    var pr = pin.getBoundingClientRect();
+    var phoneR = document.querySelector('.phone').getBoundingClientRect();
+    var tipW = 260;
+    var left = pr.left - phoneR.left + 10;
+    if (left + tipW > phoneR.width - 8) left = phoneR.width - tipW - 8;
+    if (left < 8) left = 8;
+    var top = pr.bottom - phoneR.top + 8;
+    if (top + 300 > phoneR.height) top = pr.top - phoneR.top - 300 - 8; // flip above
+    if (top < 8) top = 8;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  });
+});
+
+// Close tooltip
+document.getElementById('at-close').addEventListener('click',function(e){
+  e.stopPropagation();
+  document.getElementById('anno-tooltip').classList.remove('visible');
+  document.querySelectorAll('.anno-pin').forEach(function(p){ p.classList.remove('active'); });
+});
+
+// Close tooltip on click outside
+document.addEventListener('click',function(e){
+  if (!e.target.closest('.anno-pin') && !e.target.closest('.anno-tooltip') && !e.target.closest('.anno-toggle')) {
+    document.getElementById('anno-tooltip').classList.remove('visible');
+    document.querySelectorAll('.anno-pin').forEach(function(p){ p.classList.remove('active'); });
+  }
+});
+</script>
+
+<script>
+/* =====================================================================
+   Data: 6 categories × ranked pedals
+   Each pedal: { name, brand, tags, hot, intro, posts }
+   ===================================================================== */
+var pedalData = {
+  distortion: [
+    { name:"Boss DS-1 Distortion", brand:"Boss", tags:["经典","入门首选"], hot:98,
+      intro:"Boss DS-1 诞生于 1978 年，是史上销量最高的失真单块之一。标志性的橙色外壳下是一颗 aggressively voiced 的双级放大电路，从 Kurt Cobain 到 Steve Vai 都曾在板上为它留出位置。中频有轻微凹陷，适合在乐队编制中穿透混音。",
+      posts:[
+        { title:"DS-1 改机全攻略 — 从普版到 JHS 模组", author:"单块医生", likes:234 },
+        { title:"为什么我的 DS-1 插进 Fender 音箱像蚊子叫？", author:"效果器新手", likes:89 },
+        { title:"盲听对比：DS-1 vs RAT vs MXR Distortion +", author:"效果器达人", likes:567 }
+      ]},
+    { name:"ProCo RAT 2", brand:"ProCo", tags:["传奇","全能"], hot:96,
+      intro:"ProCo RAT 的历史可追溯到 1978 年的 Kalamazoo。它的 Filter 旋钮实际上是反向的高频切除，这让 RAT 既能做干净的过载推子，也能推到接近法兹的混沌失真。Jeff Beck、John Scofield、Nels Cline 都是 RAT 用户。",
+      posts:[
+        { title:"RAT 的多面性 — 从 clean boost 到 fuzz wall", author:"电路解析所", likes:312 },
+        { title:"Turbo RAT vs RAT 2 — LED 削波到底有什么不同？", author:"效果器达人", likes:178 },
+        { title:"我的 1986 年白脸 RAT 翻新记", author:"复古设备控", likes:145 }
+      ]},
+    { name:"Boss MT-2 Metal Zone", brand:"Boss", tags:["金属","争议之王"], hot:91,
+      intro:"MT-2 可能是史上最被误解的效果器。它的半参数中频 EQ 提供了巨大的音色塑形能力，但出厂预设让无数初学者直接插进清音通道，得到了'蜜蜂窝'音色。秘诀：把它接进 Effect Loop，世界从此不同。",
+      posts:[
+        { title:"MT-2 的正确用法 — 接进 Loop 之后我真的错了", author:"金属吉他手", likes:890 },
+        { title:"MT-2 改机：从蜜蜂窝到凶器", author:"单块医生", likes:445 }
+      ]},
+    { name:"MXR Distortion +", brand:"MXR", tags:["复古","70年代"], hot:82,
+      intro:"MXR Distortion + 发布于 1972 年，仅有两个旋钮 — Output 和 Distortion。简单的运放 + 锗二极管削波电路，声音开放、动态极佳，是经典摇滚音色的基础构件。Randy Rhoads 的御用失真。",
+      posts:[
+        { title:"MXR Dist+ vs DOD 250 — 挛生兄弟的音色差异", author:"效果器达人", likes:203 },
+        { title:"用 Dist+ 推清音管箱得到的惊喜", author:"老派摇滚", likes:167 }
+      ]},
+    { name:"Strymon Riverside", brand:"Strymon", tags:["数字","高动态"], hot:78,
+      intro:"Riverside 是 Strymon 对 '数字能否做出真实的模拟过载/失真触感' 的回答。采用 SHARC DSP 高电压内部处理，它的 JFET 前级模拟提供了前所未有的触弦响应和动态范围。",
+      posts:[
+        { title:"Riverside 深入评测 — 数字失真的触感革命", author:"效果器达人", likes:356 },
+        { title:"Riverside vs 真管箱过载 — 盲听你能分辨吗？", author:"AB测试频道", likes:289 }
+      ]},
+    { name:"Fulltone OCD", brand:"Fulltone", tags: ["过载/失真","动态"], hot:76,
+      intro:"OCD 使用 MOSFET 削波 + 一个独特的 HP/LP 切换开关，在 '传统过载' 和 '开放式失真' 之间架起了一座桥。它的动态响应是最大卖点 — 用拨弦力度就能从清音走到咆哮。",
+      posts:[
+        { title:"OCD v1.4 vs v2.0 — 版本差异全解读", author:"设备考古", likes:198 },
+        { title:"OCD 搭配各种音箱的参考音色表", author:"效果器达人", likes:134 }
+      ]},
+    { name:"JHS Angry Charlie", brand:"JHS", tags:["Marshall-in-a-box"], hot:74,
+      intro:"Angry Charlie 是 JHS 对 'Marshall 音箱装在盒子里' 的诠释。从 JTM45 的温暖 crunch 到 JCM800 的高增益咆哮，这个小金块试图用一个 3 段 EQ 覆盖英式失真的黄金年代。",
+      posts:[
+        { title:"Angry Charlie vs Marshall Guv'nor — MIAB 对决", author:"效果器达人", likes:156 }
+      ]},
+    { name:"Wampler Plexi-Drive", brand:"Wampler", tags:["Plexi音色","英式"], hot:70,
+      intro:"Wampler Plexi-Drive 聚焦于一个非常具体的音色目标：60 年代末 Marshall Plexi 音箱的 cranked 音色。内置的 bass boost 开关可以补偿小音箱的低频不足。",
+      posts:[
+        { title:"Plexi-Drive Deluxe — 双通道的魅力", author:"设备猎人", likes:123 }
+      ]},
+    { name:"Suhr Riot", brand:"Suhr", tags:["高增益","紧凑"], hot:67,
+      intro:"Suhr Riot 是一个紧凑的高增益失真，专为需要现代摇滚/金属音色但 pedalboard 空间有限的乐手设计。三钮简约操控，音色却出奇地饱满。",
+      posts:[
+        { title:"Riot vs Riot Mini vs Riot Reloaded — 三代对比", author:"效果器达人", likes:98 }
+      ]},
+    { name:"EarthQuaker Devices Acapulco Gold", brand:"EarthQuaker Devices", tags:["Sunn","毁灭性"], hot:63,
+      intro:"Acapulco Gold 模仿 Sunn Model T 音箱的 power-amp 失真，只有一个巨大的旋钮控制音量/失真度。简单、野蛮、但好听。它证明了有时候一个旋钮就够了。",
+      posts:[
+        { title:"用 Acapulco Gold 推贝斯 — 太疯狂了但居然能用", author:"实验贝斯手", likes:211 }
+      ]},
+    { name:"Revv G3", brand:"Revv", tags:["金属","紧致"], hot:60,
+      intro:"Revv G3 是加拿大 Revv Amplification 的 Generator 音箱前级踏板化。紫色外壳里装着三段 EQ + 音量/增益/侵略度控制，以紧致的低频响应和清晰的音符分离度著称。",
+      posts:[
+        { title:"G3 vs G4 — Revv 三兄弟哪款适合你？", author:"金属设备评测", likes:145 }
+      ]},
+    { name:"Walrus Audio Iron Horse", brand:"Walrus Audio", tags:["LM308","RAT变体"], hot:55,
+      intro:"Iron Horse 是一个基于 LM308 运放的高增益失真，本质上是 RAT 电路的高级改良版。三档削波切换让它在不同压缩感和开放度之间变换。",
+      posts:[
+        { title:"Iron Horse V3 新增的削波模式到底有多大区别？", author:"效果器猎人", likes:87 }
+      ]}
+  ],
+
+  overdrive: [
+    { name:"Ibanez TS808 Tube Screamer", brand:"Ibanez", tags:["经典","中频驼峰"], hot:99,
+      intro:"TS808 是过载效果器的代名词。发布于 1979 年，它的标志性'中频驼峰'让吉他音色在混音中自然靠前。Stevie Ray Vaughan 用它推 Fender 音箱，创造了一个时代的声音。",
+      posts:[
+        { title:"TS808 vs TS9 — 到底差在哪里？内部电路逐元件对比", author:"电路解析所", likes:678 },
+        { title:"为什么 Tube Screamer 在贝斯上也这么好听？", author:"跨界玩家", likes:134 },
+        { title:"TS808 推清音管箱 vs 推已过载管箱的实战对比", author:"效果器达人", likes:456 }
+      ]},
+    { name:"Boss SD-1 Super Overdrive", brand:"Boss", tags:["性价比之王","非对称削波"], hot:95,
+      intro:"SD-1 使用非对称削波电路产生更接近电子管放大器的泛音结构。它和 TS 系列一样有中频聚焦，但音色更明亮、增益范围更大，是很多职业吉他手板子上最便宜的块也是最不可替代的块。",
+      posts:[
+        { title:"SD-1 改机指南 — 从 50 元到 500 元音质飞跃", author:"单块医生", likes:523 },
+        { title:"为什么这么多 session 乐手板子上都有 SD-1？", author:"音乐制作人", likes:389 }
+      ]},
+    { name:"Klon Centaur", brand:"Klon", tags:["传奇","透明过载"], hot:94,
+      intro:"Klon Centaur 被誉为'圣杯'级过载。它的电路设计独特 — 使用双联电位器将清信号和过载信号按比例混合，从而产生极其透明的过载。原版二手价格已炒至数万人民币。",
+      posts:[
+        { title:"Klon 的神话是真实的吗？盲听测试揭示真相", author:"AB测试频道", likes:1230 },
+        { title:"Wampler Tumnus vs Archer vs Sugar Drive — Klone 大战", author:"效果器达人", likes:567 }
+      ]},
+    { name:"JHS Morning Glory", brand:"JHS", tags:["Blues Breaker风格","透明"], hot:88,
+      intro:"Morning Glory 基于经典的 Marshall Blues Breaker 电路改进而来，增加了更多的增益和 headroom。它的'透明'特性让它成为绝佳的 always-on 基础音色塑造工具。Bright Cut 拨档可以适应不同音箱的高频响应。",
+      posts:[
+        { title:"Morning Glory V4 — 值得从 V3 升级吗？", author:"效果器猎人", likes:234 }
+      ]},
+    { name:"Boss BD-2 Blues Driver", brand:"Boss", tags:["蓝调","全能"], hot:86,
+      intro:"BD-2 使用 FET 级联增益电路而非传统的二极管削波，这让它的过载特性更接近电子管放大器的自然破音。它可以做清亮的 boost，也可以推到接近失真的领域，是 Boss 紧凑系列中用途最广的块之一。",
+      posts:[
+        { title:"BD-2 vs BD-2W — 自定义模式的秘密", author:"效果器达人", likes:345 },
+        { title:"BD-2 为什么是 shoegaze 吉他手的秘密武器", author:"盯鞋党", likes:198 }
+      ]},
+    { name:"Wampler Tumnus", brand:"Wampler", tags:["Klone","紧凑"], hot:83,
+      intro:"Tumnus 是最受好评的 Klon 复刻之一。它在保留原版透明过载特性的同时，增加了更多的增益范围和一个三频 EQ。小巧的外壳意味着它可以轻松塞进任何板子。",
+      posts:[
+        { title:"Tumnus vs Tumnus Deluxe — 多一个 EQ 值不值？", author:"设备评测台", likes:178 }
+      ]},
+    { name:"EarthQuaker Devices Plumes", brand:"EarthQuaker Devices", tags:["TS风格","三模式"], hot:79,
+      intro:"Plumes 是对 Tube Screamer 电路的现代重想象。三档削波切换（LED / 非对称 MOSFET / 对称 MOSFET）让它拥有远超传统 TS 的音色范围，而且价格非常友好。",
+      posts:[
+        { title:"Plumes 三种削波模式的实测音色对比", author:"EQD粉丝", likes:267 }
+      ]},
+    { name:"Nobels ODR-1", brand:"Nobels", tags:["自然过载","低音保留"], hot:75,
+      intro:"ODR-1 的 Spectrum 旋钮是个巧妙的设计 — 它能同时控制中频削减和高频增强。相比 TS 系过载，ODR-1 的低频饱满得多，特别适合 Telecaster 或需要更'完整'音色的场合。Nashville session 乐手的最爱。",
+      posts:[
+        { title:"ODR-1 为什么是 Tele 吉他手的完美过载", author:"乡村吉他手", likes:312 }
+      ]},
+    { name:"Analog Man King of Tone", brand:"Analog Man", tags:["传奇","双通道","等待名单"], hot:73,
+      intro:"King of Tone 的等待名单长达数年，但这并没有阻止人们对它的追捧。双通道设计、每个通道独立的 OD/Clean Boost/Distortion 切换、以及稀有的 MA856 二极管，让它成为过载世界的'皇冠上的明珠'。",
+      posts:[
+        { title:"KOT 等待 5 年后我收到的第一反应", author:"终于拥有KOT的人", likes:456 }
+      ]},
+    { name:"Boss OD-3", brand:"Boss", tags:["被低估","温暖"], hot:65,
+      intro:"OD-3 常被 SD-1 和 BD-2 的光芒遮蔽，但它在日本国内一直有忠实拥趸。它的过载音色比 SD-1 更饱满温暖，比 BD-2 更'传统'。如果你想找一个不跟风的 Boss 过载，OD-3 就是答案。",
+      posts:[
+        { title:"OD-3 — Boss 家族中最被低估的过载", author:"设备考古", likes:189 }
+      ]},
+    { name:"Paul Cochrane Timmy", brand:"Paul Cochrane", tags:["透明","参考级"], hot:62,
+      intro:"Timmy 是最早的'透明过载'概念推动者之一。它的 EQ 是 cut-only 设计（而非 boost），这意味着你可以削减不需要的频率，而不增加任何色彩。MXR 后来推出了授权量产版 Timmy。",
+      posts:[
+        { title:"Timmy v2 vs MXR Timmy — 原创 vs 量产", author:"效果器达人", likes:145 }
+      ]}
+  ],
+
+  delay: [
+    { name:"Boss DD-8 Digital Delay", brand:"Boss", tags:["全能","11种模式"], hot:97,
+      intro:"DD-8 是 Boss 数字延迟系列的第八代旗舰，11 种模式覆盖了从经典的 warm digital 到磁带、模拟、shimmer、reverse、loop 等所有你需要的声音。立体声 I/O 和 tap tempo 让它成为同价位最全能的延迟。",
+      posts:[
+        { title:"DD-8 所有 11 种模式深度试听", author:"效果器达人", likes:567 },
+        { title:"DD-8 vs DD-7 — 值得升级吗？", author:"设备猎人", likes:234 }
+      ]},
+    { name:"Strymon Timeline", brand:"Strymon", tags:["旗舰","12引擎"], hot:96,
+      intro:"Timeline 几乎是'大 box 延迟'的代名词。12 种延迟引擎、200 个预设、MIDI 控制和行业领先的音质，让它成为无数职业吉他手和巡演乐手的唯一延迟解决方案。dTape 和 dBucket 引擎的模拟精度至今仍是一流。",
+      posts:[
+        { title:"Timeline 五年使用报告 — 哪些引擎我还在用？", author:"职业吉他手", likes:890 },
+        { title:"Timeline MIDI 整合到 Helix 系统的完整教程", author:"系统集成者", likes:345 }
+      ]},
+    { name:"MXR Carbon Copy", brand:"MXR", tags:["模拟","温暖"], hot:93,
+      intro:"Carbon Copy 是现代模拟延迟热潮的引领者之一。全模拟 bucket-brigade 电路产生温暖、黑暗的延迟重复，调制按钮可以在重复音上加一层微妙的合唱效果。简洁、好听、不挑音箱。",
+      posts:[
+        { title:"Carbon Copy vs Carbon Copy Deluxe — 多了 tap tempo 值吗？", author:"效果器猎人", likes:278 }
+      ]},
+    { name:"TC Electronic Flashback 2", brand:"TC Electronic", tags:["多功能","TonePrint"], hot:88,
+      intro:"Flashback 2 延续了 TC 电子在延迟领域的深厚积淀。除了 8 种内置模式，MASH 脚踏开关可以通过压力感应来控制延迟参数，TonePrint 还允许你载入艺术家定制的延迟算法。",
+      posts:[
+        { title:"用 MASH 做实时延迟 oscillation 效果", author:"实验吉他手", likes:167 }
+      ]},
+    { name:"Boss DM-2W Waza Craft", brand:"Boss", tags:["纯模拟","复古"], hot:85,
+      intro:"DM-2W 是经典 Boss DM-2 模拟延迟的 Waza Craft 复刻版。Custom 模式增加了更长的延迟时间，但 Standard 模式严格还原了原版的温暖、暗色调延迟音色。Bucket-brigade 的魔力就在这。",
+      posts:[
+        { title:"DM-2W vs 元年 DM-2 — Waza 到底还原了多少？", author:"设备考古", likes:234 }
+      ]},
+    { name:"Strymon El Capistan", brand:"Strymon", tags:["磁带延迟","dTape"], hot:84,
+      intro:"El Capistan 是对磁带延迟的终极致敬。它模拟了三台磁带机（Echoplex、Space Echo、Binson Echorec）的特性，从磁带压缩到 wow/flutter、偏压到磁头磨损，每一个细节都被精细建模。",
+      posts:[
+        { title:"El Capistan 的 Secondary 模式隐藏功能汇总", author:"Strymon深度用户", likes:456 }
+      ]},
+    { name:"Electro-Harmonix Deluxe Memory Man", brand:"Electro-Harmonix", tags:["经典","模拟合唱延迟"], hot:80,
+      intro:"Deluxe Memory Man 有着其他模拟延迟无法复制的音色 — 温暖但不黑暗的延迟重复，内置的 vibrato/chorus 调制可以让重复音产生梦幻般的浮动感。The Edge 的标志性延迟音色很大程度上依赖 DMM。",
+      posts:[
+        { title:"DMM XO vs 元年 DMM — 现代版差在哪里？", author:"设备考古", likes:198 }
+      ]},
+    { name:"Empress EchoSystem", brand:"Empress", tags:["双引擎","录音室级"], hot:77,
+      intro:"Empress EchoSystem 是少数可以同时运行两个独立延迟引擎的踏板，支持串行、并行和左右声道分离。它的算法质量在录音室级别，且操作意外地直观 — 没有藏在菜单深处的功能。",
+      posts:[
+        { title:"EchoSystem 双引擎并行的创意用法", author:"氛围音乐人", likes:178 }
+      ]},
+    { name:"JHS Panther Cub", brand:"JHS", tags:["模拟","v1.5"], hot:69,
+      intro:"Panther Cub 是 JHS 对经典模拟延迟的致敬。它使用两个 MN3205 BBD 芯片获得更长的延迟时间，同时保持纯模拟信号路径。'Roar' 开关给重复音增添了独特的过载特性。",
+      posts:[
+        { title:"Panther Cub vs DM-2W vs Carbon Copy — 模拟延迟三国演义", author:"效果器达人", likes:345 }
+      ]},
+    { name:"Walrus Audio ARP-87", brand:"Walrus Audio", tags:["紧凑","数字"], hot:66,
+      intro:"ARP-87 在紧凑的外壳里塞进了四种精心调校的延迟算法：数字、模拟、Lo-Fi 和磁带。X 旋钮在每个模式下有不同的功能（调制深度、滤波器宽度等），让这个小小的盒子有出乎意料的深度。",
+      posts:[
+        { title:"ARP-87 的 Lo-Fi 模式到底有多 lo？", author:"Lo-Fi爱好者", likes:134 }
+      ]}
+  ],
+
+  reverb: [
+    { name:"Strymon BigSky", brand:"Strymon", tags:["旗舰","12引擎"], hot:99,
+      intro:"BigSky 是混响踏板的行业标准。12 种混响引擎，从经典的 Spring/Room/Hall/Plate 到独特的 Cloud/Bloom/Magneto/Chorale，每一款都是由 Strymon 的 SHARC DSP 精细建模的声学空间。Machine 算法排名板仓社区年度'最想要'混响引擎第一名。",
+      posts:[
+        { title:"BigSky Cloud 模式 — 如何调出氛围吉他天花板音色", author:"氛围音乐人", likes:1230 },
+        { title:"BigSky vs BigSky MX — 多花几千块值不值？", author:"效果器达人", likes:890 },
+        { title:"BigSky MIDI 预设管理终极指南", author:"系统集成者", likes:456 }
+      ]},
+    { name:"Boss RV-6", brand:"Boss", tags:["全能","紧凑"], hot:93,
+      intro:"RV-6 是 Boss 紧凑混响系列的第六代。8 种模式包括全新的 Shimmer 和 Dynamic 模式，后者能根据你的弹奏力度自动调节混响深度。立体声 I/O 和合理的价格让它成为入门到专业都适用的选择。",
+      posts:[
+        { title:"RV-6 vs RV-5 — 每一代 Boss 混响的变化", author:"设备评测台", likes:345 }
+      ]},
+    { name:"TC Electronic Hall of Fame 2", brand:"TC Electronic", tags:["TonePrint","MASH"], hot:87,
+      intro:"Hall of Fame 2 在经典的 TC 混响系列基础上加入了 MASH 压力感应脚踏和全新的 Shimmer 算法。TonePrint 生态允许你下载从艺术家定制到实验性算法的各种混响预设。",
+      posts:[
+        { title:"HOF2 的 10 个最佳 TonePrint 预设推荐", author:"TC用户社区", likes:234 }
+      ]},
+    { name:"Strymon BlueSky", brand:"Strymon", tags:["经典","紧凑"], hot:86,
+      intro:"BlueSky 是 BigSky 的紧凑前身，但它不是'简化版' — 它的 Spring/Room/Plate 三种基础算法 + Shimmer 调制本质上是一种不同的设计哲学：少即是多。很多职业吉他手只用一个 BlueSky 就能覆盖所有演出需求。",
+      posts:[
+        { title:"BlueSky vs Flint — Strymon 紧凑混响的选择", author:"效果器达人", likes:312 }
+      ]},
+    { name:"Electro-Harmonix Holy Grail", brand:"Electro-Harmonix", tags:["经典","入门"], hot:81,
+      intro:"Holy Grail 是最简单的混响踏板之一：一个三档开关（Spring/Hall/Flerb）+ 一个混响量旋钮。但这种简单背后是 EHX 对混响算法的深刻理解。无数独立摇滚和 shoegaze 乐队的第一块混响就是它。",
+      posts:[
+        { title:"Holy Grail Neo vs Nano vs Max — 该选哪个？", author:"效果器新手", likes:178 }
+      ]},
+    { name:"EarthQuaker Devices Afterneath", brand:"EarthQuaker Devices", tags:["实验","洞穴"], hot:78,
+      intro:"Afterneath 不是传统的混响踏板 — 它使用一连串短延迟来模拟声音在洞穴中反射的效果。Drag 旋钮控制'洞穴大小'，Reflect 控制反射密度，Diffuse 调节扩散程度。它更像一个可演奏的氛围合成器。",
+      posts:[
+        { title:"Afterneath V3 新增的模式让这块疯得更厉害了", author:"实验噪音", likes:267 }
+      ]},
+    { name:"Meris Mercury7", brand:"Meris", tags:["Blade Runner","科幻"], hot:75,
+      intro:"Mercury7 的灵感来自 1982 年《银翼杀手》的配乐氛围。Cathedral 和 Plate 两种基础算法加上独特的 Pitch Vector 调制，创造出充满科幻感的巨大空间混响。自动滤波 swell 功能让你不需要音量踏板也能做氛围音量弓。",
+      posts:[
+        { title:"Mercury7 配合成器比配吉他更好听？", author:"电子音乐人", likes:189 }
+      ]},
+    { name:"Empress Reverb", brand:"Empress", tags:["录音室级","25种算法"], hot:73,
+      intro:"Empress Reverb 拥有 25 种混响算法，从经典的 Spring 到超现实的 Ghost/Beer（是的，真的叫 Beer）模式。SD 卡支持固件更新，意味着它的算法库还在不断扩充。",
+      posts:[
+        { title:"Empress Reverb 的 Beer 模式到底是什么鬼？", author:"好奇宝宝", likes:345 }
+      ]},
+    { name:"Walrus Audio Slö", brand:"Walrus Audio", tags:["梦幻","氛围"], hot:70,
+      intro:"Slö 是专门为氛围音乐设计的混响。Dark（暗系调制）/ Rise（自动音量弓）/ Dream（挂留混响 + 颤音）三种模式全都指向一个目标：让你的吉他漂浮在云端。X 旋钮控制调制深度，按住 Sustain 开关可以冻结混响。",
+      posts:[
+        { title:"Slö vs Slötva — 多了一个预设值多少钱？", author:"氛围吉他手", likes:156 }
+      ]},
+    { name:"Neunaber Immerse", brand:"Neunaber", tags:["录音室品质","立体声"], hot:67,
+      intro:"Neunaber Immerse 在紧凑的盒子里实现了立体声录音室级别的混响质量。Wet 算法是 Neunaber 的成名之作 — 一种极其平滑、调制丰富的混响音色，从板混响到无限氛围都能胜任。",
+      posts:[
+        { title:"Immerse MkII 新加的 Sustain 模式实测", author:"效果器达人", likes:134 }
+      ]}
+  ],
+
+  modulation: [
+    { name:"Boss CE-2W Waza Craft", brand:"Boss", tags:["合唱","经典"], hot:96,
+      intro:"CE-2W 是 Boss 经典 CE-2 合唱的 Waza Craft 复刻版。CE-2 模式忠实还原了原版的温暖、立体声合唱音色，CE-1 模式则加入了那个传奇的 preamp 电路和独特的颤音/合唱切换。真正的模拟 bucket-brigade 合唱。",
+      posts:[
+        { title:"CE-2W CE-1 模式的 preamp 到底有没有魔力？", author:"设备评测台", likes:456 }
+      ]},
+    { name:"MXR Phase 90", brand:"MXR", tags:["相位","传奇"], hot:94,
+      intro:"Phase 90 是最简单的效果器之一 — 一个旋钮，一个速率。但这种简单正是它的魔力所在。从 Van Halen 的 Ain't Talkin' 'Bout Love 到 Pink Floyd 的 Breathe，Phase 90 的标志性 sweep 定义了几代摇滚吉他音色。",
+      posts:[
+        { title:"Phase 90 Script vs Block Logo — 两个版本到底是同一个电路吗？", author:"设备考古", likes:345 }
+      ]},
+    { name:"Electro-Harmonix Small Clone", brand:"Electro-Harmonix", tags:["合唱","Nirvana"], hot:87,
+      intro:"Small Clone 可能是最著名的模拟合唱踏板 — Kurt Cobain 用它录制了 Come As You Are 的前奏。简单的 Rate + Depth 控制，却产生了所有模拟合唱中最丰富、最有机的调制质感。",
+      posts:[
+        { title:"Small Clone vs Neo Clone — 大哥和小弟的差距", author:"EHX粉丝", likes:234 }
+      ]},
+    { name:"Walrus Audio Julia", brand:"Walrus Audio", tags:["合唱/颤音","现代"], hot:85,
+      intro:"Julia 是一个模拟合唱/颤音混合体。Lag 旋钮是它的秘密武器 — 它控制延迟时间的偏移，让你可以在传统合唱、旋转扬声器感和纯颤音之间平滑过渡。D-C-V 混合控制让你精确设定干湿比例。",
+      posts:[
+        { title:"Julia V2 vs Julianna — 立体声值不值得升级？", author:"Walrus用户", likes:278 }
+      ]},
+    { name:"Strymon Mobius", brand:"Strymon", tags:["全能","12种调制"], hot:82,
+      intro:"Mobius 是'调制效果器的最后一站'。12 种调制引擎覆盖了合唱、镶边、旋转扬声器、颤音、相位、滤波、自动哇音、bit-crusher 等。200 个预设和 MIDI 控制让它成为录音室和大型巡演的主力设备。",
+      posts:[
+        { title:"Mobius 的 Destroyer 模式 — 8-bit 调制乱玩指南", author:"实验音乐人", likes:198 }
+      ]},
+    { name:"Boss BF-3 Flanger", brand:"Boss", tags:["镶边","多功能"], hot:78,
+      intro:"BF-3 是 Boss 的现代数字镶边。四种模式包括标准、Ultra（超深反馈）、Gate/Pan（门控镶边）和 Momentary（瞬时）。相比经典的 BF-2 模拟镶边，BF-3 的声音更干净、更精确，也更适合贝斯。",
+      posts:[
+        { title:"BF-3 vs BF-2 vs HF-2 — Boss 镶边家族对比", author:"效果器达人", likes:167 }
+      ]},
+    { name:"MXR Uni-Vibe", brand:"MXR", tags:["Uni-Vibe","Jimi"], hot:76,
+      intro:"MXR Uni-Vibe 是现代踏板版的经典 Uni-Vibe 旋转合唱效果。使用光敏电阻和灯泡模拟原始 Uni-Vibe 的独特相位扫描，从 Jimi Hendrix 的 Machine Gun 到 Pink Floyd 的 Breathe 都依赖这个音色。",
+      posts:[
+        { title:"Uni-Vibe vs 旋转扬声器踏板 — 到底能不能互相替代？", author:"效果器达人", likes:212 }
+      ]},
+    { name:"TC Electronic Corona Chorus", brand:"TC Electronic", tags:["数字","TonePrint"], hot:70,
+      intro:"Corona Chorus 使用 TC 的 Tri-Chorus 算法（最初来自经典的 TC 2290 机架延迟），创造出极其立体、丰富的合唱质感。TonePrint 允许加载从 80 年代流行到现代梦幻流行的各种合唱预设。",
+      posts:[
+        { title:"用 Corona Chorus 做 JC-120 风格的立体声合唱", author:"爵士吉他手", likes:145 }
+      ]},
+    { name:"Boss TR-2 Tremolo", brand:"Boss", tags:["颤音","简单"], hot:68,
+      intro:"TR-2 是 Boss 对经典 Fender 音箱光学颤音的致敬。Wave 旋钮可以在三角波（硬颤音）和方波（直升机颤音）之间平滑过渡。简单、精准、好听，这就是 Boss 风格。",
+      posts:[
+        { title:"TR-2 的音量衰减问题 — 真的解决了吗？", author:"设备问答", likes:123 }
+      ]},
+    { name:"EarthQuaker Devices Sea Machine", brand:"EarthQuaker Devices", tags:["实验合唱","疯狂"], hot:63,
+      intro:"Sea Machine 不是传统合唱。Dimension、Animate、Shape 和 Intensity 四个旋钮的复杂交互可以产生从微妙的双track到混乱的 pitch-shifting 合唱的各种效果。如果你觉得合唱'无聊'，试试这块。",
+      posts:[
+        { title:"Sea Machine V3 的 Dimension 旋钮到底控制什么？", author:"电路极客", likes:98 }
+      ]}
+  ],
+
+  multi: [
+    { name:"Line 6 HX Stomp", brand:"Line 6", tags:["紧凑","Helix引擎"], hot:98,
+      intro:"HX Stomp 将 Line 6 旗舰级 Helix 建模引擎塞进一个紧凑的 stompbox 里。300+ 个效果器、音箱、箱体和 IR 加载，最多 8 个同时运行的模块。MIDI、USB 音频接口、效果回路，这一切都装在一个巴掌大的盒子里。它是板仓社区票选的'最想拥有的综合效果器'第一名。",
+      posts:[
+        { title:"HX Stomp 作为 pedalboard 中枢的终极配置指南", author:"系统集成者", likes:1230 },
+        { title:"HX Stomp 的 IR 选择 — 免费 vs 付费 IR 盲听", author:"AB测试频道", likes:567 },
+        { title:"HX Stomp 配真单块 — 4 线接法完整教程", author:"效果器达人", likes:890 }
+      ]},
+    { name:"Neural DSP Quad Cortex", brand:"Neural DSP", tags:["AI建模","触屏"], hot:96,
+      intro:"Quad Cortex 使用机器学习捕捉任何设备的声音特征（音箱、箱体、过载踏板等），配合 Neural DSP 自研的虚拟音箱建模。7 英寸触屏、四核 SHARC DSP、Wi-Fi 云端预设分享，这是一个真正以 21 世纪方式设计的综合效果器。",
+      posts:[
+        { title:"Quad Cortex 捕捉效果器 — 比你想象的更准", author:"技术极客", likes:678 },
+        { title:"QC vs Kemper vs Axe-FX — 三大建模平台的盲听对决", author:"效果器达人", likes:1230 }
+      ]},
+    { name:"Boss GT-1000", brand:"Boss", tags:["AIRD","Boss品质"], hot:85,
+      intro:"GT-1000 是 Boss 的综合旗舰，使用 AIRD (Augmented Impulse Response Dynamics) 技术对音箱的每一个组件进行独立建模。32-bit AD/DA 转换、模拟效果回路、以及 Boss 著名的可靠性和做工。",
+      posts:[
+        { title:"GT-1000 的 AIRD 输出选择 — 什么场景用什么设置", author:"Boss深度用户", likes:345 }
+      ]},
+    { name:"Kemper Profiler", brand:"Kemper", tags:["Profiling","录音室标准"], hot:83,
+      intro:"Kemper Profiler 开创了'音箱克隆'这一品类。它可以精确捕捉任何音箱（包括你的音箱+特定设置）的声音特征，并存储为 Profile。全球有数以万计的商业和免费 Profile 可供使用。",
+      posts:[
+        { title:"Kemper Stage vs Rack vs Toaster — 该选哪个形态？", author:"Kemper用户", likes:456 }
+      ]},
+    { name:"Fractal Audio FM9", brand:"Fractal Audio", tags:["旗舰","录音室级"], hot:80,
+      intro:"FM9 是 Fractal Audio 的落地式综合效果器，搭载 Axe-Fx III 级别的建模引擎。它的音箱建模被广泛认为是业内最精确的，效果器算法尤其在混响和延迟方面达到了录音室级别。",
+      posts:[
+        { title:"FM9 vs FM3 — 多花一倍的钱得到了什么？", author:"Fractal用户", likes:345 }
+      ]},
+    { name:"HeadRush MX5", brand:"HeadRush", tags:["性价比","触屏"], hot:75,
+      intro:"HeadRush MX5 在继承 Eleven HD 建模引擎的基础上，加入了 4 英寸触屏和极其直观的拖放式信号链编辑。在这个价位，它的触屏操作体验几乎没有对手。",
+      posts:[
+        { title:"MX5 作为第一个综合效果器 — 入门全流程", author:"综合新手", likes:234 }
+      ]},
+    { name:"Zoom G6", brand:"Zoom", tags:["性价比","易用"], hot:70,
+      intro:"Zoom G6 使用 Zoom 新一代的 Multi-Layer IR 音箱建模，配合 4.3 英寸触屏和 6 个无限旋转编码器。内置的 70 个 IR 和 240 个效果器覆盖了几乎所有风格。",
+      posts:[
+        { title:"G6 vs G5n — Zoom 两代综合的差距有多大", author:"设备评测台", likes:167 }
+      ]},
+    { name:"Line 6 Helix LT", brand:"Line 6", tags:["完整版","巡演"], hot:69,
+      intro:"Helix LT 共享 Helix Floor 的完整双 DSP 引擎，但去掉了 scribble strips 和部分 I/O 来降低价格。对于不需要顶级配置的乐手来说，LT 是进入完整 Helix 生态的最经济途径。",
+      posts:[
+        { title:"Helix LT vs Helix Floor — 差了哪些让你少花几千", author:"设备猎人", likes:345 }
+      ]},
+    { name:"Boss GT-1", brand:"Boss", tags:["入门","便携"], hot:64,
+      intro:"GT-1 是 Boss GT 系列的入门型号，但它内部的核心建模引擎和 GT-1000 来自同一个 COSM 技术家族。3 节 AA 电池供电、紧凑轻便、功能齐全，是练习和 jam session 的理想伴侣。",
+      posts:[
+        { title:"GT-1 用电池能用多久？真实续航测试", author:"实用评测", likes:178 }
+      ]},
+    { name:"Valeton GP-200", brand:"Valeton", tags:["国货之光","高性价比"], hot:61,
+      intro:"Valeton GP-200 是一个令人惊喜的国产综合效果器。200+ IR、140+ 效果器/音箱模型、彩色触屏、表情踏板和丰富的 I/O，价格却非常亲民。在这个价位，它几乎没有真正的竞争对手。",
+      posts:[
+        { title:"GP-200 vs NUX MG-30 — 国产千元综合大对决", author:"国货评测", likes:456 }
+      ]}
+  ]
+};
+
+/* ---- Render pedal rows for a given category ---- */
+function renderRanking(cat) {
+  var list = pedalData[cat];
+  if (!list) return;
+  var html = '';
+  for (var i = 0; i < list.length; i++) {
+    var p = list[i];
+    var rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : 'normal';
+    var tagsHtml = p.tags.map(function(t) { return '<span class="pedal-tag">' + t + '</span>'; }).join('');
+    var hotHtml = p.hot >= 90 ? '<span class="hot-badge">HOT</span>' : '';
+    html +=
+      '<div class="pedal-row animate-in" style="animation-delay:' + (i * 20) + 'ms" onclick="openPedalModal(\'' + cat + '\',' + i + ')">' +
+        '<div class="pedal-rank ' + rankClass + '">' + (i + 1) + '</div>' +
+        '<div class="pedal-info">' +
+          '<div class="pedal-name">' + p.name + '</div>' +
+          '<div class="pedal-brand">' + p.brand + '</div>' +
+          '<div class="pedal-tags">' + tagsHtml + '</div>' +
+        '</div>' +
+        '<div class="pedal-stats">' +
+          hotHtml +
+        '</div>' +
+        '<div style="flex-shrink:0;color:var(--text-tertiary);">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>' +
+        '</div>' +
+      '</div>';
+  }
+  document.getElementById('list-' + cat).innerHTML = html;
+}
+
+/* ---- Open/Close Ranking Panel ---- */
+var currentPanel = null;
+
+function openRanking(cat) {
+  var panel = document.getElementById('panel-' + cat);
+  if (!panel) return;
+  if (!panel._rendered) {
+    renderRanking(cat);
+    panel._rendered = true;
+  }
+  panel.classList.add('open');
+  currentPanel = cat;
+}
+
+function closeRanking(cat) {
+  var panel = document.getElementById('panel-' + cat);
+  if (!panel) return;
+  panel.classList.remove('open');
+  if (currentPanel === cat) currentPanel = null;
+}
+
+/* ---- Pedal Detail Modal ---- */
+function openPedalModal(cat, index) {
+  var p = pedalData[cat][index];
+  document.getElementById('modal-name').textContent = p.name;
+  document.getElementById('modal-brand').textContent = p.brand;
+
+  var postsHtml = p.posts.map(function(rp) {
+    return '<div class="related-post">' +
+      '<div class="rp-title">' + rp.title + '</div>' +
+      '<div class="rp-meta">' + rp.author + ' · ' + rp.likes + ' 赞</div>' +
+      '</div>';
+  }).join('');
+
+  document.getElementById('modal-body').innerHTML =
+    '<div class="modal-intro">' + p.intro + '</div>' +
+    '<div class="modal-section-title">相关帖子</div>' +
+    postsHtml;
+
+  document.getElementById('pedal-modal').classList.add('open');
+}
+
+function closePedalModal(e) {
+  if (e && e.target !== document.getElementById('pedal-modal')) return;
+  document.getElementById('pedal-modal').classList.remove('open');
+}
+
+/* ---- Init ---- */
+(function init() {
+  // Pre-render the first category's ranking so users get an instant response
+  // Others render on first open (lazy)
+})();
+</script>
+
+</body>
+</html>

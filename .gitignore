@@ -1,0 +1,24 @@
+# 不上传：开发基础设施
+.claude/
+components/
+tokens/
+scripts/
+taste/
+frameworks/
+workflows/
+design-systems/
+accessibility/
+content/
+
+# 不上传：临时文件和截图
+*.png
+*.jpg
+参考*
+教程*
+convert_prd.py
+prd-content.html
+prd-header.html
+
+# 不上传：系统文件
+.DS_Store
+Thumbs.db

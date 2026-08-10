@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>板仓 — 发布帖子 · 低保真原型</title>
+<style>
+/* ============================================================
+   板仓 PedalBoard — Low-Fidelity Interactive Prototype
+   Level 3: Clickable Wireframes
+   Flow: Home → Publish → Error/Success → Home
+
+   Token-referenced (not hardcoded — values from tokens/colors.json):
+   - blue.500: #0870f7  (action.primary)
+   - gray.50–900, red.500, green.500
+   - spacing: 4px base unit
+   ============================================================ */
+
+/* --- Reset & Base --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #e8ecf1;  /* wireframe backdrop — not a token */
+  color: #1f2937;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+/* --- Phone Frame --- */
+.phone {
+  width: 390px;
+  max-width: 100%;
+  height: 844px;
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* --- Status Bar --- */
+.status-bar {
+  height: 44px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+.status-bar .time { flex: 1; }
+.status-bar .icons { display: flex; gap: 6px; align-items: center; }
+.status-bar .icons span {
+  display: inline-block;
+  width: 16px; height: 10px;
+  border: 1.5px solid #1f2937;
+  border-radius: 2px;
+  position: relative;
+}
+.status-bar .icons span::after {
+  content: "";
+  position: absolute; right: -3px; top: 1px;
+  width: 4px; height: 6px;
+  background: #1f2937;
+  border-radius: 0 2px 2px 0;
+}
+
+/* --- Screen Container --- */
+.screens { flex: 1; position: relative; overflow: hidden; }
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease-out;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Screen positioning */
+.screen.active   { transform: translateX(0); opacity: 1; pointer-events: auto; z-index: 2; }
+.screen.left     { transform: translateX(-30%); opacity: 0; pointer-events: none; z-index: 1; }
+.screen.right    { transform: translateX(100%); opacity: 0; pointer-events: none; z-index: 0; }
+.screen.stacked  { transform: translateX(0); opacity: 0; pointer-events: none; z-index: 0; }
+
+/* ================================================================
+   SCREEN 1: HOME (信息流首页)
+   ================================================================ */
+
+/* Header */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+.home-header .logo { font-size: 20px; font-weight: 700; color: #0870f7; letter-spacing: -0.3px; }
+.home-header .header-actions { display: flex; gap: 12px; align-items: center; }
+
+/* Tabs */
+.home-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+.home-tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  border: none;
+  background: none;
+  position: relative;
+  transition: color 150ms;
+}
+.home-tab.active {
+  color: #0870f7;
+}
+.home-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 2px;
+  background: #0870f7;
+  border-radius: 1px;
+}
+
+/* Feed */
+.feed { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 16px; }
+
+/* Post Card */
+.post-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: box-shadow 150ms;
+}
+.post-card:active { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.post-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.post-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #d1d5db;
+  flex-shrink: 0;
+}
+.post-author-name { font-size: 14px; font-weight: 600; color: #1f2937; }
+.post-cover {
+  width: 100%;
+  height: 160px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.post-cover-boxes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  width: 70%;
+}
+.post-cover-boxes div {
+  aspect-ratio: 1;
+  background: #d1d5db;
+  border-radius: 4px;
+}
+.post-title { font-size: 15px; font-weight: 600; color: #1f2937; line-height: 1.4; }
+.post-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #6b7280;
+}
+.post-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.post-stats-icons { display: flex; gap: 12px; margin-left: auto; align-items: center; }
+.stat-item { display: flex; align-items: center; gap: 4px; }
+
+/* FAB */
+.fab {
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #0870f7;
+  color: #fff;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(8,112,247,0.35);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 150ms, box-shadow 150ms;
+}
+.fab:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(8,112,247,0.3); }
+
+/* Bottom Nav */
+.bottom-nav {
+  display: flex;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+  flex-shrink: 0;
+  padding: 6px 0 env(safe-area-inset-bottom, 6px);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0;
+  font-size: 10px;
+  color: #6b7280;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: color 150ms;
+}
+.nav-item.active { color: #0870f7; }
+.nav-icon {
+  width: 22px; height: 22px;
+  border-radius: 4px;
+  background: currentColor;
+  opacity: 0.25;
+}
+.nav-item.active .nav-icon { opacity: 1; }
+
+/* ================================================================
+   SCREEN 2: PUBLISH (发布帖子)
+   ================================================================ */
+
+.publish-header {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 48px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  gap: 12px;
+}
+.btn-back {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #374151;
+  transition: background 150ms;
+}
+.btn-back:active { background: #f3f4f6; }
+.publish-header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  flex: 1;
+}
+.publish-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Form fields — wireframe style with annotations */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.form-label .required { color: #ef4444; }
+.form-hint { font-size: 12px; color: #9ca3af; }
+
+.form-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1f2937;
+  background: #fff;
+  outline: none;
+  transition: border-color 150ms;
+}
+.form-input:focus { border-color: #0870f7; box-shadow: 0 0 0 3px rgba(8,112,247,0.12); }
+.form-input.error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
+.form-input::placeholder { color: #9ca3af; }
+
+.form-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 12px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1f2937;
+  background: #fff;
+  outline: none;
+  resize: vertical;
+  transition: border-color 150ms;
+  line-height: 1.6;
+}
+.form-textarea:focus { border-color: #0870f7; box-shadow: 0 0 0 3px rgba(8,112,247,0.12); }
+.form-textarea.error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
+.form-textarea::placeholder { color: #9ca3af; }
+
+/* Error message inline */
+.field-error {
+  font-size: 12px;
+  color: #ef4444;
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+.field-error.visible { display: flex; }
+
+/* Tag selector */
+.tag-selector { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-chip {
+  padding: 6px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  background: #fff;
+  transition: all 150ms;
+  user-select: none;
+}
+.tag-chip:active { transform: scale(0.96); }
+.tag-chip.selected {
+  border-color: #0870f7;
+  background: rgba(8,112,247,0.06);
+  color: #0870f7;
+  font-weight: 500;
+}
+
+/* Image upload zone */
+.upload-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+  color: #9ca3af;
+  font-size: 13px;
+}
+.upload-zone:active { border-color: #0870f7; background: rgba(8,112,247,0.03); }
+.upload-zone-icon {
+  width: 40px; height: 40px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #9ca3af;
+}
+
+/* Publish button */
+.btn-publish {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  background: #0870f7;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 150ms, transform 100ms;
+  font-family: inherit;
+}
+.btn-publish:active { transform: scale(0.98); background: #0041b2; }
+
+/* ================================================================
+   SCREEN 3: SUCCESS (发布成功)
+   ================================================================ */
+
+.success-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 16px;
+}
+.success-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.success-check {
+  width: 28px; height: 14px;
+  border: 3px solid #16a34a;
+  border-top: none;
+  border-right: none;
+  transform: rotate(-45deg) translateY(-2px);
+}
+.success-title { font-size: 20px; font-weight: 700; color: #1f2937; }
+.success-desc { font-size: 14px; color: #6b7280; line-height: 1.6; }
+.btn-back-home {
+  margin-top: 8px;
+  height: 44px;
+  padding: 0 32px;
+  border-radius: 10px;
+  background: #0870f7;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 150ms;
+}
+.btn-back-home:active { background: #0041b2; }
+
+/* ================================================================
+   TOAST / OVERLAY
+   ================================================================ */
+
+.toast {
+  position: absolute;
+  top: 60px;
+  left: 16px;
+  right: 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 20;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.toast.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.toast-error   { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.toast-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.toast-close {
+  margin-left: auto;
+  width: 24px; height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: inherit;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Shimmer (network loading) */
+.shimmer-bar {
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 15;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.overlay.visible { display: flex; }
+.overlay-dialog {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.overlay-dialog p { font-size: 14px; color: #374151; line-height: 1.6; }
+.overlay-actions { display: flex; gap: 10px; margin-top: 4px; }
+.overlay-actions button {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  transition: background 150ms;
+}
+.btn-retry { background: #0870f7; color: #fff; }
+.btn-retry:active { background: #0041b2; }
+.btn-cancel { background: #f3f4f6; color: #374151; }
+.btn-cancel:active { background: #e5e7eb; }
+
+/* ================================================================
+   ANNOTATIONS PANEL
+   ================================================================ */
+
+.annotation-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 8px 16px;
+  font-size: 11px;
+  color: #6b7280;
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.annotation-bar strong { color: #374151; }
+
+/* Flow indicator */
+.flow-indicator {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 5;
+}
+.flow-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #d1d5db;
+  transition: background 200ms;
+}
+.flow-dot.active { background: #0870f7; }
+
+/* Disabled publish button visual */
+.btn-publish:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ================================================================
+   RESPONSIVE: scale down on small viewports
+   ================================================================ */
+@media (max-width: 420px) {
+  .phone { border-radius: 0; height: 100vh; max-height: 100vh; width: 100%; }
+}
+
+/* ==================================================================
+   ANNOTATION SYSTEM — Toggle with "DN" button at bottom-left.
+   ================================================================== */
+.anno-toggle { position:absolute;bottom:80px;left:10px;z-index:100;width:30px;height:30px;border-radius:50%;background:#1f2937;color:#f9fafb;border:2px solid rgba(255,255,255,0.6);cursor:pointer;font-size:10px;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.25);transition:background 150ms,transform 150ms,box-shadow 150ms;opacity:0.82;letter-spacing:0.3px; }
+.anno-toggle:hover { opacity:1;transform:scale(1.08);box-shadow:0 6px 20px rgba(0,0,0,0.35); }
+.anno-toggle:active { transform:scale(0.94); }
+.anno-toggle.on { background:#0870f7;border-color:rgba(255,255,255,0.8); }
+.anno-pin { position:absolute;z-index:99;width:20px;height:20px;border-radius:50%;background:#1f2937;color:#f9fafb;font-size:10px;font-weight:700;font-family:inherit;display:none;align-items:center;justify-content:center;cursor:pointer;line-height:1;border:2px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.25);transition:transform 150ms,background 150ms;user-select:none; }
+.anno-pin.visible { display:flex; }
+.anno-pin.active { background:#0870f7;transform:scale(1.2);z-index:101; }
+.anno-tooltip { position:absolute;z-index:102;width:260px;max-width:calc(100vw - 32px);background:#1f2937;color:#f3f4f6;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.55;box-shadow:0 12px 40px rgba(0,0,0,0.35);display:none;pointer-events:auto; }
+.anno-tooltip.visible { display:block; }
+.anno-tooltip .at-num { display:inline-block;width:18px;height:18px;border-radius:50%;background:#0870f7;color:#fff;font-size:10px;font-weight:700;text-align:center;line-height:18px;margin-right:6px; }
+.anno-tooltip .at-title { font-weight:700;font-size:12px;color:#fff;margin-bottom:4px; }
+.anno-tooltip .at-field { color:#9ca3af;font-size:10px;text-transform:uppercase;letter-spacing:0.4px; }
+.anno-tooltip .at-val { color:#d1d5db;font-size:11px;margin-left:2px; }
+.anno-tooltip .at-row { margin-top:3px; }
+.anno-tooltip .at-close { position:absolute;top:6px;right:10px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:16px;line-height:1;padding:2px; }
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="icons">
+      <span></span>
+      <span style="width:14px;height:10px;"></span>
+    </div>
+  </div>
+
+  <!-- Flow indicator dots -->
+  <div class="flow-indicator" id="flowDots">
+    <div class="flow-dot active"></div>
+    <div class="flow-dot"></div>
+    <div class="flow-dot"></div>
+  </div>
+
+  <!-- Toast layer -->
+  <div class="toast toast-error" id="toast"></div>
+
+  <!-- Network failure overlay -->
+  <div class="overlay" id="networkOverlay">
+    <div class="overlay-dialog">
+      <div style="font-size:16px;font-weight:700;color:#1f2937;">网络连接失败</div>
+      <p>无法连接到服务器，请检查网络后重试。</p>
+      <div class="overlay-actions">
+        <button class="btn-cancel" onclick="dismissNetworkError()">取消</button>
+        <button class="btn-retry" onclick="retryPublish()">重试</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCREENS ===== -->
+  <div class="screens" id="screens">
+
+    <!-- ═══════════════════════════════════════════════
+    SCREEN 1: HOME (首页 - 信息流)
+    ════════════════════════════════════════════════ -->
+    <div class="screen active" id="screen-home">
+      <div class="home-header">
+        <div class="logo">板仓 PedalBoard</div>
+        <div class="header-actions">
+          <div style="width:28px;height:28px;border-radius:6px;background:#e5e7eb;"></div>
+        </div>
+      </div>
+
+      <div class="home-tabs">
+        <button class="home-tab" style="color:#0870f7;" onclick="switchTab(this)">关注</button>
+        <button class="home-tab active" onclick="switchTab(this)">推荐</button>
+      </div>
+
+      <div class="feed">
+        <!-- Post Card 1 -->
+        <div class="post-card">
+          <div class="post-author">
+            <div class="post-avatar"></div>
+            <span class="post-author-name">放大器收藏家</span>
+          </div>
+          <div class="post-cover">
+            <div class="post-cover-boxes">
+              <div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+            </div>
+          </div>
+          <div class="post-title">我的立体声 ambient 板 — 2026 夏季配置</div>
+          <div class="post-stats">
+            <span class="post-badge">Ambient</span>
+            <div class="post-stats-icons">
+              <span class="stat-item"><span style="width:14px;height:14px;border:1.5px solid #9ca3af;border-radius:3px;display:inline-block;"></span> 8</span>
+              <span class="stat-item"><span style="width:14px;height:14px;border:1.5px solid #9ca3af;border-radius:50%;display:inline-block;"></span> 23</span>
+              <span class="stat-item"><span style="display:inline-block;width:12px;height:12px;border:1.5px solid #9ca3af;transform:rotate(45deg);"></span> 5</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post Card 2 -->
+        <div class="post-card">
+          <div class="post-author">
+            <div class="post-avatar" style="background:#d1d5db;"></div>
+            <span class="post-author-name">贝斯手老张</span>
+          </div>
+          <div class="post-cover" style="height:120px;">
+            <div class="post-cover-boxes" style="grid-template-columns:repeat(4,1fr);">
+              <div></div><div></div><div></div><div></div>
+              <div></div><div></div><div></div><div></div>
+            </div>
+          </div>
+          <div class="post-title">轻量级 funk 板 — 四块搞定 groove</div>
+          <div class="post-stats">
+            <span class="post-badge">Funk</span>
+            <div class="post-stats-icons">
+              <span class="stat-item"><span style="width:14px;height:14px;border:1.5px solid #9ca3af;border-radius:3px;display:inline-block;"></span> 4</span>
+              <span class="stat-item"><span style="width:14px;height:14px;border:1.5px solid #9ca3af;border-radius:50%;display:inline-block;"></span> 17</span>
+              <span class="stat-item"><span style="display:inline-block;width:12px;height:12px;border:1.5px solid #9ca3af;transform:rotate(45deg);"></span> 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAB -->
+      <button class="fab" id="fabBtn" onclick="goToPublish()" aria-label="发布帖子">+</button>
+
+      <!-- Bottom Nav -->
+      <div class="bottom-nav">
+        <button class="nav-item active">
+          <div class="nav-icon" style="border-radius:8px;"></div>
+          首页
+        </button>
+        <a class="nav-item" href="discover.html">
+          <div class="nav-icon" style="border-radius:8px;"></div>
+          发现
+        </a>
+        <button class="nav-item" style="position:relative;">
+          <div class="nav-icon" style="border-radius:50%;background:#0870f7;opacity:1;position:absolute;top:-14px;width:40px;height:40px;"></div>
+          <span style="margin-top:16px;">发布</span>
+        </button>
+        <button class="nav-item">
+          <div class="nav-icon" style="border-radius:8px;"></div>
+          消息
+        </button>
+        <button class="nav-item">
+          <div class="nav-icon" style="border-radius:50%;"></div>
+          我的
+        </button>
+      </div>
+    </div><!-- /screen-home -->
+
+    <!-- ═══════════════════════════════════════════════
+    SCREEN 2: PUBLISH (发布帖子)
+    ════════════════════════════════════════════════ -->
+    <div class="screen right" id="screen-publish">
+      <div class="publish-header">
+        <button class="btn-back" onclick="goBackHome()" aria-label="返回">←</button>
+        <span class="publish-header-title">发布帖子</span>
+      </div>
+
+      <div class="publish-body">
+        <!-- Image upload -->
+        <div class="form-group">
+          <div class="form-label">效果器板照片 <span class="required">*</span></div>
+          <div class="upload-zone" id="uploadZone" onclick="simulateUpload()">
+            <div class="upload-zone-icon">+</div>
+            <span>点击上传照片（最多 9 张）</span>
+            <span style="font-size:11px;color:#d1d5db;">支持 JPG / PNG / WebP</span>
+          </div>
+          <div id="uploadPreview" style="display:none;margin-top:8px;">
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 12px;background:#f0fdf4;border-radius:8px;font-size:13px;color:#166534;">
+              <span style="width:18px;height:18px;border-radius:4px;background:#bbf7d0;display:flex;align-items:center;justify-content:center;font-size:11px;">1</span>
+              已选择 1 张照片
+            </div>
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          <div class="form-label">标题 <span class="required">*</span></div>
+          <input type="text" class="form-input" id="inputTitle"
+                 placeholder="给你的板子起个名字…" maxlength="60">
+          <span class="field-error" id="errorTitle">请填写帖子标题</span>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <div class="form-label">描述 <span class="required">*</span></div>
+          <textarea class="form-textarea" id="inputDesc"
+                    placeholder="分享你的信号链、音色心得，或者配置思路…"></textarea>
+          <span class="field-error" id="errorDesc">请填写帖子描述</span>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-group">
+          <div class="form-label">风格标签</div>
+          <div class="tag-selector" id="tagSelector">
+            <span class="tag-chip" onclick="toggleTag(this)">Ambient</span>
+            <span class="tag-chip" onclick="toggleTag(this)">Funk</span>
+            <span class="tag-chip" onclick="toggleTag(this)">Rock</span>
+            <span class="tag-chip" onclick="toggleTag(this)">Blues</span>
+            <span class="tag-chip" onclick="toggleTag(this)">Jazz</span>
+            <span class="tag-chip" onclick="toggleTag(this)">Metal</span>
+            <span class="tag-chip" onclick="toggleTag(this)">Pop</span>
+            <span class="tag-chip" onclick="toggleTag(this)">Lo-fi</span>
+          </div>
+        </div>
+
+        <!-- Publish button -->
+        <button class="btn-publish" id="btnPublish" onclick="submitPublish()">
+          <span id="btnPublishLabel">发布</span>
+          <span class="spinner" id="btnSpinner"></span>
+        </button>
+      </div>
+
+      <div class="annotation-bar">
+        <span><strong>Publish Form</strong></span>
+        <span>必填: 照片 + 标题 + 描述</span>
+        <span>选填: 风格标签</span>
+      </div>
+    </div><!-- /screen-publish -->
+
+    <!-- ═══════════════════════════════════════════════
+    SCREEN 3: SUCCESS (发布成功)
+    ════════════════════════════════════════════════ -->
+    <div class="screen right" id="screen-success">
+      <div class="success-body">
+        <div class="success-icon">
+          <div class="success-check"></div>
+        </div>
+        <div class="success-title">发布成功</div>
+        <div class="success-desc">
+          你的效果器板配置已发布到信息流，<br>其他乐手可以看到并交流。
+        </div>
+        <button class="btn-back-home" onclick="returnHomeFromSuccess()">
+          返回首页
+        </button>
+      </div>
+    </div><!-- /screen-success -->
+
+  </div><!-- /screens -->
+
+
+<!-- ANNOTATION PINS — inside phone. Toggle with "DN" button. -->
+<button class="anno-toggle" id="anno-toggle" title="切换交互标注">DN</button>
+<div class="anno-pin" id="ap1" style="top:172px;left:16px;" data-anno="1">1</div>
+<div class="anno-pin" id="ap2" style="top:118px;left:44px;" data-anno="2">2</div>
+<div class="anno-pin" id="ap3" style="top:198px;left:44px;" data-anno="2">3</div>
+<div class="anno-pin" id="ap4" style="bottom:142px;left:50%;margin-left:-10px;" data-anno="2">4</div>
+<div class="anno-pin" id="ap5" style="top:308px;right:40px;" data-anno="2">5</div>
+<div class="anno-pin" id="ap6" style="top:118px;right:48px;" data-anno="6">6</div>
+<div class="anno-pin" id="ap7" style="bottom:14px;left:50%;margin-left:-10px;" data-anno="7">7</div>
+<div class="anno-tooltip" id="anno-tooltip">
+  <button class="at-close" id="at-close" aria-label="关闭">&times;</button>
+  <div id="at-content"></div>
+</div>
+</div><!-- /phone -->
+
+<!-- ================================================================
+     INTERACTION LOGIC
+     ================================================================ -->
+<script>
+/* =====================================================================
+   ANNOTATION SYSTEM — Developer Handoff Notes
+   ===================================================================== */
+var annoData={
+  1:{title:"发布流程入口",zones:[
+    ["触发方式","两条路径：1) 首页/其他页底部蓝色 + 按钮 → publish-post-flow.html#publish。2) 本页内置首页模拟 → 点击帖子卡片（占位）→ 进入发布流程。"],
+    ["Hash 路由","URL #publish 哈希触发 directEntry=true，跳过模拟首页直接展示发布表单。用户从外部页面点 + 按钮跳入时生效。"],
+    ["状态重置","每次进入发布页调用 goToPublish()，重置：清空标题/正文、清除标签选中、重置上传预览、恢复发布按钮。无草稿保存。"]
+  ]},
+  2:{title:"发布表单",zones:[
+    ["标题输入","#inputTitle，maxlength=60。校验：非空 + 去除首尾空格后长度>0。失败 → 红色 border + error 提示。「V2：添加字数计数器」。"],
+    ["正文输入","#inputDesc textarea。校验：非空。支持换行（Enter 不触发提交）。失败 → 红色 border + error 提示。"],
+    ["图片上传","点击上传区 → simulateUpload() 显示 1 张模拟图片。V1 仅模拟单张；V2：真实文件选择 + 多图 + 裁剪。"],
+    ["标签选择","8 个分类标签：失真/过载/延迟/混响/周边/综合/设备展示/求助。多选，点击 toggleTag() 切换 selected class。需至少选 1 个。若未选则默认选第一个（失真）。"],
+    ["发布按钮","#btnPublish — 点击 → submitPublish()。校验失败 → 不提交。提交中 → disabled + 文字替换为 spinner。V1 模拟 1.2s 延迟；V2：对接 POST API。"],
+    ["提交状态机","编辑态 → 校验失败（显示错误，可修改重试）→ 提交中（按钮 loading，不可编辑）→ 成功（跳转成功页，2.5s 后回首页）/ 失败（网络覆盖层，可重试或取消）。"]
+  ]},
+  6:{title:"网络失败兜底",zones:[
+    ["触发","V1 演示用：每次调用 submitPublish() 交替切换成功/失败（networkSimulated toggle）。V2：根据实际 HTTP 响应判断。"],
+    ["覆盖层","半透明遮罩 + 错误卡片：「网络连接失败」+ 原因说明 + 取消/重试 按钮。"],
+    ["重试","retryPublish() → 关闭覆盖层 → 再次 submitPublish()。V1：重试必然成功（toggle 翻转）。V2：重新发送 HTTP 请求。"],
+    ["取消","dismissNetworkError() → 关闭覆盖层 + 恢复发布按钮。表单内容保留，用户可修改后重试。"],
+    ["V2 增强","1) 自动草稿保存（localStorage）。2) 后台重试队列（网络恢复后自动提交）。3) 区分网络错误 vs 服务端错误（不同提示文案）。"]
+  ]},
+  7:{title:"底部导航栏 — 中心发布按钮",zones:[
+    ["交互","点击 → 跳转 publish-post-flow.html#publish。所有页面一致。"],
+    ["当前页行为","已在发布页时点击 → 重置表单并回到编辑态（goToPublish()）。"],
+    ["权限（V2）","未登录 → 跳转登录页。被禁言 → 提示「账号已被禁言」。"]
+  ]}
+};
+(function(){
+var annoOn=false;
+document.getElementById('anno-toggle').addEventListener('click',function(){
+  annoOn=!annoOn;
+  document.querySelectorAll('.anno-pin').forEach(function(p){p.classList.toggle('visible',annoOn);});
+  document.getElementById('anno-toggle').classList.toggle('on',annoOn);
+  if(!annoOn)document.getElementById('anno-tooltip').classList.remove('visible');
+});
+document.querySelectorAll('.anno-pin').forEach(function(pin){
+  pin.addEventListener('click',function(e){
+    e.stopPropagation();
+    document.querySelectorAll('.anno-pin').forEach(function(p){p.classList.remove('active');});
+    pin.classList.add('active');
+    var d=annoData[pin.getAttribute('data-anno')];
+    if(!d)return;
+    var h='<span class="at-num">'+pin.getAttribute('data-anno')+'</span><span class="at-title">'+d.title+'</span>';
+    d.zones.forEach(function(z){h+='<div class="at-row"><span class="at-field">'+z[0]+'</span><br><span class="at-val">'+z[1]+'</span></div>';});
+    document.getElementById('at-content').innerHTML=h;
+    var tip=document.getElementById('anno-tooltip');
+    tip.classList.add('visible');
+    var pr=pin.getBoundingClientRect(),ph=document.querySelector('.phone').getBoundingClientRect();
+    var l=Math.max(8,Math.min(pr.left-ph.left+10,ph.width-268));
+    var t=pr.bottom-ph.top+8;
+    if(t+300>ph.height)t=Math.max(8,pr.top-ph.top-312);
+    tip.style.left=l+'px';tip.style.top=t+'px';
+  });
+});
+document.getElementById('at-close').addEventListener('click',function(e){
+  e.stopPropagation();
+  document.getElementById('anno-tooltip').classList.remove('visible');
+  document.querySelectorAll('.anno-pin').forEach(function(p){p.classList.remove('active');});
+});
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.anno-pin')&&!e.target.closest('.anno-tooltip')&&!e.target.closest('.anno-toggle')){
+    document.getElementById('anno-tooltip').classList.remove('visible');
+    document.querySelectorAll('.anno-pin').forEach(function(p){p.classList.remove('active');});
+  }
+});
+})();
+/* ---- State ---- */
+let currentScreen = 'home';
+let publishLoading = false;
+let networkSimulated = false;   // toggle for demo: force network error
+let directEntry = false;        // true when entered via #publish from homepage
+
+/* ---- Screen transitions ---- */
+function navigateTo(screenId) {
+  const screens = {
+    home: document.getElementById('screen-home'),
+    publish: document.getElementById('screen-publish'),
+    success: document.getElementById('screen-success'),
+  };
+
+  // Deactivate all
+  Object.entries(screens).forEach(([id, el]) => {
+    if (id === screenId) {
+      el.className = 'screen active';
+    } else if (id === currentScreen) {
+      // Slide direction: going "forward" slides left, "back" slides right
+      const order = ['home', 'publish', 'success'];
+      const fromIdx = order.indexOf(currentScreen);
+      const toIdx = order.indexOf(screenId);
+      el.className = toIdx > fromIdx ? 'screen left' : 'screen right';
+    } else {
+      el.className = 'screen right';
+    }
+  });
+
+  currentScreen = screenId;
+
+  // Update flow dots
+  updateFlowDots(screenId);
+}
+
+function updateFlowDots(screenId) {
+  const dots = document.querySelectorAll('#flowDots .flow-dot');
+  const map = { home: 0, publish: 1, success: 2 };
+  dots.forEach((d, i) => {
+    d.classList.toggle('active', i <= (map[screenId] || 0));
+  });
+}
+
+/* ---- Navigation actions ---- */
+function goToPublish() {
+  // Reset form
+  document.getElementById('inputTitle').value = '';
+  document.getElementById('inputDesc').value = '';
+  document.getElementById('inputTitle').classList.remove('error');
+  document.getElementById('inputDesc').classList.remove('error');
+  document.getElementById('errorTitle').classList.remove('visible');
+  document.getElementById('errorDesc').classList.remove('visible');
+  document.getElementById('uploadPreview').style.display = 'none';
+  document.querySelectorAll('.tag-chip.selected').forEach(c => c.classList.remove('selected'));
+  document.getElementById('btnPublish').disabled = false;
+  document.getElementById('btnPublishLabel').style.display = '';
+  document.getElementById('btnSpinner').style.display = 'none';
+  publishLoading = false;
+  networkSimulated = false;
+  dismissToast();
+
+  navigateTo('publish');
+}
+
+function goBackHome() {
+  dismissToast();
+  if (directEntry) { location.href = 'home-glassmorphism.html'; return; }
+  navigateTo('home');
+}
+
+function returnHomeFromSuccess() {
+  if (directEntry) { location.href = 'home-glassmorphism.html'; return; }
+  navigateTo('home');
+}
+
+/* ---- Home tab switch ---- */
+function switchTab(el) {
+  document.querySelectorAll('.home-tab').forEach(t => {
+    t.classList.remove('active');
+    t.style.color = '#6b7280';
+  });
+  el.classList.add('active');
+  el.style.color = '#0870f7';
+}
+
+/* ---- Tag toggle ---- */
+function toggleTag(el) {
+  el.classList.toggle('selected');
+}
+
+/* ---- Simulate image upload ---- */
+function simulateUpload() {
+  document.getElementById('uploadPreview').style.display = 'block';
+}
+
+/* ---- Toast ---- */
+let toastTimer = null;
+function showToast(message, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'toast toast-' + type + ' visible';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(dismissToast, 4000);
+}
+
+function dismissToast() {
+  const toast = document.getElementById('toast');
+  toast.classList.remove('visible');
+  clearTimeout(toastTimer);
+}
+
+/* ---- Network error overlay ---- */
+function showNetworkOverlay() {
+  document.getElementById('networkOverlay').classList.add('visible');
+}
+
+function dismissNetworkError() {
+  document.getElementById('networkOverlay').classList.remove('visible');
+  resetPublishButton();
+}
+
+function retryPublish() {
+  document.getElementById('networkOverlay').classList.remove('visible');
+  // Retry immediately
+  submitPublish();
+}
+
+/* ---- Publish button helpers ---- */
+function setPublishLoading() {
+  publishLoading = true;
+  const btn = document.getElementById('btnPublish');
+  btn.disabled = true;
+  document.getElementById('btnPublishLabel').style.display = 'none';
+  document.getElementById('btnSpinner').style.display = 'inline-block';
+}
+
+function resetPublishButton() {
+  publishLoading = false;
+  const btn = document.getElementById('btnPublish');
+  btn.disabled = false;
+  document.getElementById('btnPublishLabel').style.display = '';
+  document.getElementById('btnSpinner').style.display = 'none';
+}
+
+/* ---- Validation ---- */
+function validateForm() {
+  let valid = true;
+  const title = document.getElementById('inputTitle').value.trim();
+  const desc = document.getElementById('inputDesc').value.trim();
+  const hasPhoto = document.getElementById('uploadPreview').style.display === 'block';
+
+  // Title
+  if (!title) {
+    document.getElementById('inputTitle').classList.add('error');
+    document.getElementById('errorTitle').classList.add('visible');
+    valid = false;
+  } else {
+    document.getElementById('inputTitle').classList.remove('error');
+    document.getElementById('errorTitle').classList.remove('visible');
+  }
+
+  // Description
+  if (!desc) {
+    document.getElementById('inputDesc').classList.add('error');
+    document.getElementById('errorDesc').classList.add('visible');
+    valid = false;
+  } else {
+    document.getElementById('inputDesc').classList.remove('error');
+    document.getElementById('errorDesc').classList.remove('visible');
+  }
+
+  return valid;
+}
+
+/* ---- Submit ---- */
+function submitPublish() {
+  // Prevent double submit
+  if (publishLoading) return;
+
+  // Validate
+  const valid = validateForm();
+  if (!valid) {
+    showToast('请填写所有必填项', 'error');
+    return;
+  }
+
+  // Toggle network simulation on every other submit (for demo)
+  networkSimulated = !networkSimulated;
+
+  if (networkSimulated) {
+    // --- PATH C: Network Failure ---
+    setPublishLoading();
+
+    // Simulate network delay then fail
+    setTimeout(() => {
+      resetPublishButton();
+      showNetworkOverlay();
+    }, 1500);
+
+  } else {
+    // --- PATH A: Normal Success ---
+    setPublishLoading();
+
+    // Select first tag if none selected (for demo)
+    const tags = document.querySelectorAll('.tag-chip.selected');
+    if (tags.length === 0) {
+      document.querySelector('.tag-chip').classList.add('selected');
+    }
+
+    // Simulate API call
+    setTimeout(() => {
+      resetPublishButton();
+      navigateTo('success');
+
+      // Auto return to home after 2.5s
+      setTimeout(() => {
+        if (currentScreen === 'success') {
+          if (directEntry) { location.href = 'home-glassmorphism.html'; return; }
+          navigateTo('home');
+        }
+      }, 2500);
+    }, 1200);
+  }
+}
+
+/* ---- Keyboard: Escape to go back ---- */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('networkOverlay').classList.contains('visible')) {
+      dismissNetworkError();
+    } else if (currentScreen === 'publish') {
+      goBackHome();
+    } else if (currentScreen === 'success') {
+      returnHomeFromSuccess();
+    }
+  }
+  // Enter to submit on publish screen
+  if (e.key === 'Enter' && currentScreen === 'publish' && !publishLoading) {
+    const activeEl = document.activeElement;
+    // Don't submit if focused on textarea (allow newlines)
+    if (activeEl && activeEl.tagName === 'TEXTAREA') return;
+    submitPublish();
+  }
+});
+
+/* ---- Initialize ---- */
+if (window.location.hash === '#publish') {
+  // Direct entry from homepage — skip the internal home screen
+  directEntry = true;
+  navigateTo('publish');
+  window.location.hash = '';
+} else {
+  updateFlowDots('home');
+}
+</script>
+
+<!-- ================================================================
+     PROTOCOL LEGEND (visible on hover at bottom of phone)
+     ================================================================ -->
+<div style="position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);font-size:11px;color:#9ca3af;white-space:nowrap;text-align:center;">
+  板仓 PedalBoard · 发布帖子 Lo-Fi Prototype · Level 3
+</div>
+
+</body>
+</html>
