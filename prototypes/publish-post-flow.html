@@ -3,369 +3,232 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>板仓 — 发布帖子 · 低保真原型</title>
+<title>板仓 PedalBoard - 发布帖子</title>
 <style>
-/* ============================================================
-   板仓 PedalBoard — Low-Fidelity Interactive Prototype
-   Level 3: Clickable Wireframes
-   Flow: Home → Publish → Error/Success → Home
+/* =====================================================================
+   板仓 PedalBoard · Publish Post Flow
+   Glassmorphism theme — consistent with all other prototype pages
+   ===================================================================== */
 
-   Token-referenced (not hardcoded — values from tokens/colors.json):
-   - blue.500: #0870f7  (action.primary)
-   - gray.50–900, red.500, green.500
-   - spacing: 4px base unit
-   ============================================================ */
+/* ---- CSS Custom Properties (shared token layer) ---- */
+:root {
+  --blue-50:  #b7f7ff;  --blue-100: #abecff;  --blue-200: #93d8ff;
+  --blue-300: #6bb6ff;  --blue-400: #3589ff;  --blue-500: #0870f7;
+  --blue-600: #0041b2;  --blue-700: #002489;  --blue-800: #000969;
+  --blue-900: #00004a;  --blue-950: #040034;
 
-/* --- Reset & Base --- */
+  --gray-50:  #f9fafb;  --gray-100: #f3f4f6;  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;  --gray-400: #9ca3af;  --gray-500: #6b7280;
+  --gray-600: #4b5563;  --gray-700: #374151;  --gray-800: #1f2937;
+  --gray-900: #111827;  --gray-950: #030712;
+
+  --green-500: #22c55e; --green-600: #16a34a;
+  --red-500:   #ef4444; --red-600:   #dc2626;
+  --amber-500: #f59e0b; --amber-600: #d97706;
+
+  --action-primary:       var(--blue-500);
+  --action-primary-hover: var(--blue-600);
+  --text-primary:         var(--gray-800);
+  --text-secondary:       var(--gray-500);
+  --text-tertiary:        var(--gray-400);
+  --text-inverse:         #ffffff;
+  --border-default:       rgba(255,255,255,0.35);
+  --border-strong:        rgba(255,255,255,0.55);
+  --feedback-error:       var(--red-500);
+  --feedback-success:     var(--green-600);
+
+  --glass-bg-card:        rgba(255,255,255,0.62);
+  --glass-bg-nav:         rgba(255,255,255,0.72);
+  --glass-bg-header:      rgba(255,255,255,0.78);
+  --glass-blur-card:      12px;
+  --glass-blur-nav:       16px;
+  --glass-blur-header:    16px;
+  --glass-border:         1px solid rgba(255,255,255,0.38);
+  --glass-border-strong:  1px solid rgba(255,255,255,0.55);
+
+  --shadow-glass-card:      0 8px 32px rgba(8,112,247,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-glass-card-hover: 0 12px 40px rgba(8,112,247,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-glass-nav:       0 -1px 0 rgba(255,255,255,0.4), 0 -4px 16px rgba(0,0,0,0.04);
+  --shadow-glass-fab:       0 4px 20px rgba(8,112,247,0.30), 0 1px 4px rgba(0,0,0,0.08);
+
+  --radius-card:   16px;
+  --radius-button: 12px;
+  --radius-chip:   20px;
+  --radius-input:  12px;
+
+  --duration-fast:     100ms;
+  --duration-base:     200ms;
+  --duration-moderate: 300ms;
+  --ease-out:          cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out:       cubic-bezier(0.4, 0, 0.2, 1);
+
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+}
+
+/* ---- Reset & Base ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  background: #e8ecf1;  /* wireframe backdrop — not a token */
-  color: #1f2937;
+  font-family: "Plus Jakarta Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 16px;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; padding: 16px;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(8,112,247,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(107,182,255,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 60% at 50% 80%, rgba(147,216,255,0.08) 0%, transparent 60%),
+    linear-gradient(160deg, #f0f5ff 0%, #f8faff 30%, #f2f6ff 60%, #eef3fc 100%);
+  background-attachment: fixed;
 }
 
-/* --- Phone Frame --- */
+/* ---- Orbs ---- */
+.orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(60px); will-change: transform;
+}
+.orb-1 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(8,112,247,0.18), transparent 70%);
+  top: -80px; left: -60px;
+}
+.orb-2 {
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(107,182,255,0.14), transparent 70%);
+  top: 280px; right: -80px;
+}
+.orb-3 {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(147,216,255,0.10), transparent 70%);
+  bottom: 0; left: 20%;
+}
+
+/* ---- Phone Frame ---- */
 .phone {
-  width: 390px;
-  max-width: 100%;
-  height: 844px;
-  max-height: 90vh;
-  background: #fff;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  width: 390px; max-width: 100%;
+  height: 844px; max-height: 90vh;
+  border-radius: 24px; overflow: hidden;
+  display: flex; flex-direction: column; position: relative; z-index: 1;
+  background: transparent;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 20px 60px rgba(8,112,247,0.08), 0 4px 16px rgba(0,0,0,0.06);
 }
 
-/* --- Status Bar --- */
+/* ---- Status Bar ---- */
 .status-bar {
   height: 44px;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1f2937;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(var(--glass-blur-header));
+  -webkit-backdrop-filter: blur(var(--glass-blur-header));
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; font-size: 12px; font-weight: 600;
+  color: var(--text-primary); flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
 }
 .status-bar .time { flex: 1; }
 .status-bar .icons { display: flex; gap: 6px; align-items: center; }
 .status-bar .icons span {
-  display: inline-block;
-  width: 16px; height: 10px;
-  border: 1.5px solid #1f2937;
-  border-radius: 2px;
-  position: relative;
+  display: inline-block; width: 16px; height: 10px;
+  border: 1.5px solid var(--text-primary); border-radius: 2px; position: relative;
 }
 .status-bar .icons span::after {
-  content: "";
-  position: absolute; right: -3px; top: 1px;
-  width: 4px; height: 6px;
-  background: #1f2937;
-  border-radius: 0 2px 2px 0;
+  content: ""; position: absolute; right: -3px; top: 1px;
+  width: 4px; height: 6px; background: var(--text-primary); border-radius: 0 2px 2px 0;
 }
 
-/* --- Screen Container --- */
+/* ---- Screen Container ---- */
 .screens { flex: 1; position: relative; overflow: hidden; }
 .screen {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  background: #fff;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  background: transparent;
   transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease-out;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: auto; overflow-x: hidden;
 }
-
-/* Screen positioning */
 .screen.active   { transform: translateX(0); opacity: 1; pointer-events: auto; z-index: 2; }
-.screen.left     { transform: translateX(-30%); opacity: 0; pointer-events: none; z-index: 1; }
 .screen.right    { transform: translateX(100%); opacity: 0; pointer-events: none; z-index: 0; }
-.screen.stacked  { transform: translateX(0); opacity: 0; pointer-events: none; z-index: 0; }
 
 /* ================================================================
-   SCREEN 1: HOME (信息流首页)
-   ================================================================ */
-
-/* Header */
-.home-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
-}
-.home-header .logo { font-size: 20px; font-weight: 700; color: #0870f7; letter-spacing: -0.3px; }
-.home-header .header-actions { display: flex; gap: 12px; align-items: center; }
-
-/* Tabs */
-.home-tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
-}
-.home-tab {
-  flex: 1;
-  text-align: center;
-  padding: 12px 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
-  cursor: pointer;
-  border: none;
-  background: none;
-  position: relative;
-  transition: color 150ms;
-}
-.home-tab.active {
-  color: #0870f7;
-}
-.home-tab.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 2px;
-  background: #0870f7;
-  border-radius: 1px;
-}
-
-/* Feed */
-.feed { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 16px; }
-
-/* Post Card */
-.post-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: #fff;
-  cursor: pointer;
-  transition: box-shadow 150ms;
-}
-.post-card:active { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.post-author {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.post-avatar {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: #d1d5db;
-  flex-shrink: 0;
-}
-.post-author-name { font-size: 14px; font-weight: 600; color: #1f2937; }
-.post-cover {
-  width: 100%;
-  height: 160px;
-  background: #f3f4f6;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.post-cover-boxes {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  width: 70%;
-}
-.post-cover-boxes div {
-  aspect-ratio: 1;
-  background: #d1d5db;
-  border-radius: 4px;
-}
-.post-title { font-size: 15px; font-weight: 600; color: #1f2937; line-height: 1.4; }
-.post-stats {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 13px;
-  color: #6b7280;
-}
-.post-badge {
-  font-size: 12px;
-  padding: 2px 8px;
-  background: #f3f4f6;
-  color: #6b7280;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-.post-stats-icons { display: flex; gap: 12px; margin-left: auto; align-items: center; }
-.stat-item { display: flex; align-items: center; gap: 4px; }
-
-/* FAB */
-.fab {
-  position: absolute;
-  bottom: 80px;
-  right: 20px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: #0870f7;
-  color: #fff;
-  border: none;
-  font-size: 28px;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(8,112,247,0.35);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 150ms, box-shadow 150ms;
-}
-.fab:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(8,112,247,0.3); }
-
-/* Bottom Nav */
-.bottom-nav {
-  display: flex;
-  border-top: 1px solid #e5e7eb;
-  background: #fff;
-  flex-shrink: 0;
-  padding: 6px 0 env(safe-area-inset-bottom, 6px);
-}
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 0;
-  font-size: 10px;
-  color: #6b7280;
-  cursor: pointer;
-  border: none;
-  background: none;
-  transition: color 150ms;
-}
-.nav-item.active { color: #0870f7; }
-.nav-icon {
-  width: 22px; height: 22px;
-  border-radius: 4px;
-  background: currentColor;
-  opacity: 0.25;
-}
-.nav-item.active .nav-icon { opacity: 1; }
-
-/* ================================================================
-   SCREEN 2: PUBLISH (发布帖子)
+   SCREEN: PUBLISH (发布帖子)
    ================================================================ */
 
 .publish-header {
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  height: 48px;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
-  gap: 12px;
+  display: flex; align-items: center;
+  padding: 0 16px; height: 48px;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(var(--glass-blur-header));
+  -webkit-backdrop-filter: blur(var(--glass-blur-header));
+  border-bottom: var(--glass-border);
+  flex-shrink: 0; gap: 12px;
 }
 .btn-back {
-  width: 32px; height: 32px;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
+  width: 32px; height: 32px; border-radius: 10px;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(8px);
+  border: var(--glass-border);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: #374151;
-  transition: background 150ms;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  transition: background var(--duration-fast), color var(--duration-fast);
+  flex-shrink: 0;
 }
-.btn-back:active { background: #f3f4f6; }
-.publish-header-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
-  flex: 1;
-}
+.btn-back:hover { background: rgba(8,112,247,0.08); color: var(--blue-500); }
+.btn-back:active { transform: scale(0.94); }
+.publish-header-title { font-size: 16px; font-weight: 700; color: var(--text-primary); flex: 1; }
+
 .publish-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex: 1; overflow-y: auto; padding: 20px 16px;
+  display: flex; flex-direction: column; gap: 20px;
 }
 
-/* Form fields — wireframe style with annotations */
+/* Form fields */
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-primary);
+  display: flex; align-items: center; gap: 4px;
 }
-.form-label .required { color: #ef4444; }
-.form-hint { font-size: 12px; color: #9ca3af; }
+.form-label .required { color: var(--red-500); }
+.form-hint { font-size: 12px; color: var(--text-tertiary); }
 
 .form-input {
-  width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 10px;
-  font-size: 15px;
-  font-family: inherit;
-  color: #1f2937;
-  background: #fff;
-  outline: none;
-  transition: border-color 150ms;
+  width: 100%; height: 44px; padding: 0 14px;
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  border: var(--glass-border);
+  border-radius: var(--radius-input);
+  font-size: 15px; font-family: inherit;
+  color: var(--text-primary); outline: none;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
-.form-input:focus { border-color: #0870f7; box-shadow: 0 0 0 3px rgba(8,112,247,0.12); }
-.form-input.error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
-.form-input::placeholder { color: #9ca3af; }
+.form-input:focus { border-color: var(--blue-400); box-shadow: 0 0 0 3px rgba(8,112,247,0.12); }
+.form-input.error { border-color: var(--red-500); box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
+.form-input::placeholder { color: var(--text-tertiary); }
 
 .form-textarea {
-  width: 100%;
-  min-height: 140px;
-  padding: 12px 14px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 10px;
-  font-size: 15px;
-  font-family: inherit;
-  color: #1f2937;
-  background: #fff;
-  outline: none;
-  resize: vertical;
-  transition: border-color 150ms;
+  width: 100%; min-height: 140px; padding: 12px 14px;
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  border: var(--glass-border);
+  border-radius: var(--radius-input);
+  font-size: 15px; font-family: inherit;
+  color: var(--text-primary); outline: none;
+  resize: vertical; transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
   line-height: 1.6;
 }
-.form-textarea:focus { border-color: #0870f7; box-shadow: 0 0 0 3px rgba(8,112,247,0.12); }
-.form-textarea.error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
-.form-textarea::placeholder { color: #9ca3af; }
+.form-textarea:focus { border-color: var(--blue-400); box-shadow: 0 0 0 3px rgba(8,112,247,0.12); }
+.form-textarea.error { border-color: var(--red-500); box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
+.form-textarea::placeholder { color: var(--text-tertiary); }
 
 /* Error message inline */
 .field-error {
-  font-size: 12px;
-  color: #ef4444;
-  display: none;
-  align-items: center;
-  gap: 4px;
+  font-size: 12px; color: var(--red-500);
+  display: none; align-items: center; gap: 4px;
 }
 .field-error.visible { display: flex; }
 
@@ -373,150 +236,113 @@ body {
 .tag-selector { display: flex; flex-wrap: wrap; gap: 8px; }
 .tag-chip {
   padding: 6px 14px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #374151;
-  cursor: pointer;
-  background: #fff;
-  transition: all 150ms;
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  border: var(--glass-border);
+  border-radius: var(--radius-chip);
+  font-size: 13px; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--duration-fast);
   user-select: none;
 }
 .tag-chip:active { transform: scale(0.96); }
 .tag-chip.selected {
-  border-color: #0870f7;
-  background: rgba(8,112,247,0.06);
-  color: #0870f7;
-  font-weight: 500;
+  border-color: var(--blue-400);
+  background: rgba(8,112,247,0.10);
+  color: var(--blue-500); font-weight: 500;
 }
 
 /* Image upload zone */
 .upload-zone {
-  border: 2px dashed #d1d5db;
-  border-radius: 12px;
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  border: 2px dashed rgba(255,255,255,0.55);
+  border-radius: var(--radius-card);
   padding: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: border-color 150ms, background 150ms;
-  color: #9ca3af;
-  font-size: 13px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer; transition: border-color var(--duration-fast), background var(--duration-fast);
+  color: var(--text-tertiary); font-size: 13px;
 }
-.upload-zone:active { border-color: #0870f7; background: rgba(8,112,247,0.03); }
+.upload-zone:active { border-color: var(--blue-400); background: rgba(8,112,247,0.04); }
 .upload-zone-icon {
   width: 40px; height: 40px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--text-tertiary);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: #9ca3af;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: var(--text-tertiary);
 }
 
 /* Publish button */
 .btn-publish {
-  width: 100%;
-  height: 48px;
-  border-radius: 12px;
-  background: #0870f7;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: background 150ms, transform 100ms;
-  font-family: inherit;
+  width: 100%; height: 48px; border-radius: var(--radius-button);
+  background: var(--blue-500); color: #fff;
+  font-size: 16px; font-weight: 600; border: none;
+  cursor: pointer; font-family: inherit;
+  transition: background var(--duration-fast), transform 100ms, box-shadow var(--duration-fast);
+  box-shadow: var(--shadow-glass-fab);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-.btn-publish:active { transform: scale(0.98); background: #0041b2; }
+.btn-publish:hover { background: var(--blue-600); }
+.btn-publish:active { transform: scale(0.98); }
+.btn-publish:disabled { background: var(--gray-400); cursor: not-allowed; transform: none; box-shadow: none; }
 
 /* ================================================================
-   SCREEN 3: SUCCESS (发布成功)
+   SCREEN: SUCCESS (发布成功)
    ================================================================ */
 
 .success-body {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px;
-  text-align: center;
-  gap: 16px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 24px; text-align: center; gap: 16px;
 }
 .success-icon {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  background: #dcfce7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(34,197,94,0.12);
+  display: flex; align-items: center; justify-content: center;
 }
 .success-check {
   width: 28px; height: 14px;
-  border: 3px solid #16a34a;
-  border-top: none;
-  border-right: none;
+  border: 3px solid var(--green-600);
+  border-top: none; border-right: none;
   transform: rotate(-45deg) translateY(-2px);
 }
-.success-title { font-size: 20px; font-weight: 700; color: #1f2937; }
-.success-desc { font-size: 14px; color: #6b7280; line-height: 1.6; }
+.success-title { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+.success-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
 .btn-back-home {
   margin-top: 8px;
-  height: 44px;
-  padding: 0 32px;
-  border-radius: 10px;
-  background: #0870f7;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 150ms;
+  height: 44px; padding: 0 32px; border-radius: 10px;
+  background: var(--blue-500); color: #fff;
+  font-size: 15px; font-weight: 600; border: none;
+  cursor: pointer; font-family: inherit;
+  transition: background var(--duration-fast);
 }
-.btn-back-home:active { background: #0041b2; }
+.btn-back-home:hover { background: var(--blue-600); }
+.btn-back-home:active { transform: scale(0.98); }
 
 /* ================================================================
    TOAST / OVERLAY
    ================================================================ */
 
 .toast {
-  position: absolute;
-  top: 60px;
-  left: 16px;
-  right: 16px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 20;
-  opacity: 0;
+  position: absolute; top: 60px; left: 16px; right: 16px;
+  padding: 14px 16px; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  z-index: 20; opacity: 0;
   transform: translateY(-12px);
   transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
 .toast.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.toast-error   { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-.toast-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.toast-error   { background: rgba(254,242,242,0.92); backdrop-filter: blur(8px); border: 1px solid rgba(254,202,202,0.8); color: #991b1b; }
+.toast-success { background: rgba(240,253,244,0.92); backdrop-filter: blur(8px); border: 1px solid rgba(187,247,208,0.8); color: #166534; }
 .toast-close {
-  margin-left: auto;
-  width: 24px; height: 24px;
-  border-radius: 4px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 16px;
-  color: inherit;
-  opacity: 0.6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-left: auto; width: 24px; height: 24px; border-radius: 4px;
+  border: none; background: transparent; cursor: pointer;
+  font-size: 16px; color: inherit; opacity: 0.6;
+  display: flex; align-items: center; justify-content: center;
 }
 
 /* Loading spinner */
@@ -530,130 +356,144 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Shimmer (network loading) */
-.shimmer-bar {
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
 /* Overlay */
 .overlay {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background: rgba(0,0,0,0.3);
-  z-index: 15;
-  display: none;
-  align-items: center;
-  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 15; display: none;
+  align-items: center; justify-content: center;
 }
 .overlay.visible { display: flex; }
 .overlay-dialog {
-  background: #fff;
-  border-radius: 14px;
-  padding: 24px;
-  width: 300px;
+  background: var(--glass-bg-header);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 14px; padding: 24px; width: 300px;
   text-align: center;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: flex; flex-direction: column; gap: 12px;
 }
-.overlay-dialog p { font-size: 14px; color: #374151; line-height: 1.6; }
+.overlay-dialog p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
 .overlay-actions { display: flex; gap: 10px; margin-top: 4px; }
 .overlay-actions button {
-  flex: 1;
-  height: 40px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  border: none;
-  transition: background 150ms;
+  flex: 1; height: 40px; border-radius: 8px;
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  border: none; transition: background var(--duration-fast);
 }
-.btn-retry { background: #0870f7; color: #fff; }
-.btn-retry:active { background: #0041b2; }
-.btn-cancel { background: #f3f4f6; color: #374151; }
-.btn-cancel:active { background: #e5e7eb; }
+.btn-retry { background: var(--blue-500); color: #fff; }
+.btn-retry:hover { background: var(--blue-600); }
+.btn-cancel { background: rgba(0,0,0,0.06); color: var(--text-primary); }
+.btn-cancel:hover { background: rgba(0,0,0,0.10); }
 
-/* ================================================================
-   ANNOTATIONS PANEL
-   ================================================================ */
-
-.annotation-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
-  padding: 8px 16px;
-  font-size: 11px;
-  color: #6b7280;
-  display: flex;
-  gap: 16px;
+/* ---- Bottom Nav (glassmorphism, consistent across all pages) ---- */
+.bottom-nav {
+  height: 72px;
+  background: var(--glass-bg-nav);
+  backdrop-filter: blur(var(--glass-blur-nav));
+  -webkit-backdrop-filter: blur(var(--glass-blur-nav));
+  border-top: var(--glass-border);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 12px; padding-top: 6px;
   flex-shrink: 0;
-  flex-wrap: wrap;
+  box-shadow: var(--shadow-glass-nav);
+  position: relative; z-index: 2;
 }
-.annotation-bar strong { color: #374151; }
-
-/* Flow indicator */
-.flow-indicator {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 5;
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; padding: 4px 0;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 10px; font-weight: 500;
+  transition: color var(--duration-fast) var(--ease-out);
+  font-family: inherit; text-decoration: none;
 }
-.flow-dot {
-  width: 8px; height: 8px;
+.nav-item.active { color: var(--blue-500); }
+.nav-item:hover { color: var(--blue-500); }
+.nav-item.center .nav-icon-svg {
+  width: 42px; height: 42px;
+  background: var(--blue-500);
   border-radius: 50%;
-  background: #d1d5db;
-  transition: background 200ms;
+  color: #fff;
+  padding: 10px;
+  box-shadow: var(--shadow-glass-fab);
+  margin-top: -16px;
+  box-sizing: content-box;
+  transition: transform var(--duration-base) var(--ease-out);
 }
-.flow-dot.active { background: #0870f7; }
-
-/* Disabled publish button visual */
-.btn-publish:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-  transform: none;
-}
+.nav-item.center:hover .nav-icon-svg { transform: scale(1.06); }
+.nav-item.center:active .nav-icon-svg { transform: scale(0.94); }
+.nav-icon-svg { width: 22px; height: 22px; flex-shrink: 0; }
 
 /* ================================================================
-   RESPONSIVE: scale down on small viewports
+   ANNOTATION SYSTEM
    ================================================================ */
+.anno-toggle {
+  position: absolute; bottom: 80px; left: 10px; z-index: 100;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #1f2937; color: #f9fafb;
+  border: 2px solid rgba(255,255,255,0.6);
+  cursor: pointer;
+  font-size: 10px; font-weight: 700; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: background 150ms, transform 150ms, box-shadow 150ms;
+  opacity: 0.82; letter-spacing: 0.3px;
+}
+.anno-toggle:hover  { opacity: 1; transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+.anno-toggle:active { transform: scale(0.94); }
+.anno-toggle.on     { background: #0870f7; border-color: rgba(255,255,255,0.8); }
+
+.anno-pin {
+  position: absolute; z-index: 99;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #1f2937; color: #f9fafb;
+  font-size: 10px; font-weight: 700; font-family: inherit;
+  display: none; align-items: center; justify-content: center;
+  cursor: pointer; line-height: 1;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  transition: transform 150ms, background 150ms;
+  user-select: none;
+}
+.anno-pin.visible   { display: flex; }
+.anno-pin.active    { background: #0870f7; transform: scale(1.2); z-index: 101; }
+
+.anno-tooltip {
+  position: absolute; z-index: 102;
+  width: 260px; max-width: calc(100vw - 32px);
+  background: #1f2937; color: #f3f4f6;
+  border-radius: 12px; padding: 12px 14px;
+  font-size: 12px; line-height: 1.55;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  display: none; pointer-events: auto;
+}
+.anno-tooltip.visible { display: block; }
+.anno-tooltip .at-num { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: #0870f7; color: #fff; font-size: 10px; font-weight: 700; text-align: center; line-height: 18px; margin-right: 6px; }
+.anno-tooltip .at-title { font-weight: 700; font-size: 12px; color: #fff; margin-bottom: 4px; }
+.anno-tooltip .at-field { color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+.anno-tooltip .at-val { color: #d1d5db; font-size: 11px; margin-left: 2px; }
+.anno-tooltip .at-row { margin-top: 3px; }
+.anno-tooltip .at-close { position: absolute; top: 6px; right: 10px; background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 16px; line-height: 1; padding: 2px; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeInUp var(--duration-moderate) var(--ease-out) forwards; }
+
 @media (max-width: 420px) {
   .phone { border-radius: 0; height: 100vh; max-height: 100vh; width: 100%; }
 }
-
-/* ==================================================================
-   ANNOTATION SYSTEM — Toggle with "DN" button at bottom-left.
-   ================================================================== */
-.anno-toggle { position:absolute;bottom:80px;left:10px;z-index:100;width:30px;height:30px;border-radius:50%;background:#1f2937;color:#f9fafb;border:2px solid rgba(255,255,255,0.6);cursor:pointer;font-size:10px;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.25);transition:background 150ms,transform 150ms,box-shadow 150ms;opacity:0.82;letter-spacing:0.3px; }
-.anno-toggle:hover { opacity:1;transform:scale(1.08);box-shadow:0 6px 20px rgba(0,0,0,0.35); }
-.anno-toggle:active { transform:scale(0.94); }
-.anno-toggle.on { background:#0870f7;border-color:rgba(255,255,255,0.8); }
-.anno-pin { position:absolute;z-index:99;width:20px;height:20px;border-radius:50%;background:#1f2937;color:#f9fafb;font-size:10px;font-weight:700;font-family:inherit;display:none;align-items:center;justify-content:center;cursor:pointer;line-height:1;border:2px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.25);transition:transform 150ms,background 150ms;user-select:none; }
-.anno-pin.visible { display:flex; }
-.anno-pin.active { background:#0870f7;transform:scale(1.2);z-index:101; }
-.anno-tooltip { position:absolute;z-index:102;width:260px;max-width:calc(100vw - 32px);background:#1f2937;color:#f3f4f6;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.55;box-shadow:0 12px 40px rgba(0,0,0,0.35);display:none;pointer-events:auto; }
-.anno-tooltip.visible { display:block; }
-.anno-tooltip .at-num { display:inline-block;width:18px;height:18px;border-radius:50%;background:#0870f7;color:#fff;font-size:10px;font-weight:700;text-align:center;line-height:18px;margin-right:6px; }
-.anno-tooltip .at-title { font-weight:700;font-size:12px;color:#fff;margin-bottom:4px; }
-.anno-tooltip .at-field { color:#9ca3af;font-size:10px;text-transform:uppercase;letter-spacing:0.4px; }
-.anno-tooltip .at-val { color:#d1d5db;font-size:11px;margin-left:2px; }
-.anno-tooltip .at-row { margin-top:3px; }
-.anno-tooltip .at-close { position:absolute;top:6px;right:10px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:16px;line-height:1;padding:2px; }
 </style>
 </head>
 <body>
+
+<!-- Decorative Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
 
 <div class="phone" id="phone">
 
@@ -661,16 +501,8 @@ body {
   <div class="status-bar">
     <span class="time">9:41</span>
     <div class="icons">
-      <span></span>
       <span style="width:14px;height:10px;"></span>
     </div>
-  </div>
-
-  <!-- Flow indicator dots -->
-  <div class="flow-indicator" id="flowDots">
-    <div class="flow-dot active"></div>
-    <div class="flow-dot"></div>
-    <div class="flow-dot"></div>
   </div>
 
   <!-- Toast layer -->
@@ -679,7 +511,7 @@ body {
   <!-- Network failure overlay -->
   <div class="overlay" id="networkOverlay">
     <div class="overlay-dialog">
-      <div style="font-size:16px;font-weight:700;color:#1f2937;">网络连接失败</div>
+      <div style="font-size:16px;font-weight:700;color:var(--text-primary);">网络连接失败</div>
       <p>无法连接到服务器，请检查网络后重试。</p>
       <div class="overlay-actions">
         <button class="btn-cancel" onclick="dismissNetworkError()">取消</button>
@@ -691,105 +523,12 @@ body {
   <!-- ===== SCREENS ===== -->
   <div class="screens" id="screens">
 
-    <!-- ═══════════════════════════════════════════════
-    SCREEN 1: HOME (首页 - 信息流)
-    ════════════════════════════════════════════════ -->
-    <div class="screen active" id="screen-home">
-      <div class="home-header">
-        <div class="logo">板仓 PedalBoard</div>
-        <div class="header-actions">
-          <div style="width:28px;height:28px;border-radius:6px;background:#e5e7eb;"></div>
-        </div>
-      </div>
-
-      <div class="home-tabs">
-        <button class="home-tab" style="color:#0870f7;" onclick="switchTab(this)">关注</button>
-        <button class="home-tab active" onclick="switchTab(this)">推荐</button>
-      </div>
-
-      <div class="feed">
-        <!-- Post Card 1 -->
-        <div class="post-card">
-          <div class="post-author">
-            <div class="post-avatar"></div>
-            <span class="post-author-name">放大器收藏家</span>
-          </div>
-          <div class="post-cover">
-            <div class="post-cover-boxes">
-              <div></div><div></div><div></div>
-              <div></div><div></div><div></div>
-              <div></div><div></div><div></div>
-            </div>
-          </div>
-          <div class="post-title">我的立体声 ambient 板 — 2026 夏季配置</div>
-          <div class="post-stats">
-            <span class="post-badge">Ambient</span>
-            <div class="post-stats-icons">
-              <span class="stat-item"><span style="width:14px;height:14px;border:1.5px solid #9ca3af;border-radius:3px;display:inline-block;"></span> 8</span>
-              <span class="stat-item"><span style="width:14px;height:14px;border:1.5px solid #9ca3af;border-radius:50%;display:inline-block;"></span> 23</span>
-              <span class="stat-item"><span style="display:inline-block;width:12px;height:12px;border:1.5px solid #9ca3af;transform:rotate(45deg);"></span> 5</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Post Card 2 -->
-        <div class="post-card">
-          <div class="post-author">
-            <div class="post-avatar" style="background:#d1d5db;"></div>
-            <span class="post-author-name">贝斯手老张</span>
-          </div>
-          <div class="post-cover" style="height:120px;">
-            <div class="post-cover-boxes" style="grid-template-columns:repeat(4,1fr);">
-              <div></div><div></div><div></div><div></div>
-              <div></div><div></div><div></div><div></div>
-            </div>
-          </div>
-          <div class="post-title">轻量级 funk 板 — 四块搞定 groove</div>
-          <div class="post-stats">
-            <span class="post-badge">Funk</span>
-            <div class="post-stats-icons">
-              <span class="stat-item"><span style="width:14px;height:14px;border:1.5px solid #9ca3af;border-radius:3px;display:inline-block;"></span> 4</span>
-              <span class="stat-item"><span style="width:14px;height:14px;border:1.5px solid #9ca3af;border-radius:50%;display:inline-block;"></span> 17</span>
-              <span class="stat-item"><span style="display:inline-block;width:12px;height:12px;border:1.5px solid #9ca3af;transform:rotate(45deg);"></span> 3</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- FAB -->
-      <button class="fab" id="fabBtn" onclick="goToPublish()" aria-label="发布帖子">+</button>
-
-      <!-- Bottom Nav -->
-      <div class="bottom-nav">
-        <button class="nav-item active">
-          <div class="nav-icon" style="border-radius:8px;"></div>
-          首页
-        </button>
-        <a class="nav-item" href="discover.html">
-          <div class="nav-icon" style="border-radius:8px;"></div>
-          发现
-        </a>
-        <button class="nav-item" style="position:relative;">
-          <div class="nav-icon" style="border-radius:50%;background:#0870f7;opacity:1;position:absolute;top:-14px;width:40px;height:40px;"></div>
-          <span style="margin-top:16px;">发布</span>
-        </button>
-        <button class="nav-item">
-          <div class="nav-icon" style="border-radius:8px;"></div>
-          消息
-        </button>
-        <button class="nav-item">
-          <div class="nav-icon" style="border-radius:50%;"></div>
-          我的
-        </button>
-      </div>
-    </div><!-- /screen-home -->
-
-    <!-- ═══════════════════════════════════════════════
-    SCREEN 2: PUBLISH (发布帖子)
-    ════════════════════════════════════════════════ -->
-    <div class="screen right" id="screen-publish">
+    <!-- SCREEN: PUBLISH (发布帖子) — default -->
+    <div class="screen active" id="screen-publish">
       <div class="publish-header">
-        <button class="btn-back" onclick="goBackHome()" aria-label="返回">←</button>
+        <button class="btn-back" onclick="goBack()" aria-label="返回">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
         <span class="publish-header-title">发布帖子</span>
       </div>
 
@@ -800,11 +539,10 @@ body {
           <div class="upload-zone" id="uploadZone" onclick="simulateUpload()">
             <div class="upload-zone-icon">+</div>
             <span>点击上传照片（最多 9 张）</span>
-            <span style="font-size:11px;color:#d1d5db;">支持 JPG / PNG / WebP</span>
+            <span style="font-size:11px;color:var(--text-tertiary);">支持 JPG / PNG / WebP</span>
           </div>
           <div id="uploadPreview" style="display:none;margin-top:8px;">
-            <div style="display:flex;gap:8px;align-items:center;padding:8px 12px;background:#f0fdf4;border-radius:8px;font-size:13px;color:#166534;">
-              <span style="width:18px;height:18px;border-radius:4px;background:#bbf7d0;display:flex;align-items:center;justify-content:center;font-size:11px;">1</span>
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 12px;background:rgba(34,197,94,0.10);border-radius:8px;font-size:13px;color:#166534;">
               已选择 1 张照片
             </div>
           </div>
@@ -848,16 +586,32 @@ body {
         </button>
       </div>
 
-      <div class="annotation-bar">
-        <span><strong>Publish Form</strong></span>
-        <span>必填: 照片 + 标题 + 描述</span>
-        <span>选填: 风格标签</span>
-      </div>
+      <!-- Bottom Nav (publish page: center button resets form) -->
+      <nav class="bottom-nav" aria-label="主导航">
+        <a class="nav-item" href="home-glassmorphism.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          首页
+        </a>
+        <a class="nav-item" href="discover.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          发现
+        </a>
+        <button class="nav-item center active" onclick="resetForm()" aria-label="发布（当前页）">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span style="visibility:hidden;height:0;">发布</span>
+        </button>
+        <a class="nav-item" href="messages.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          消息
+        </a>
+        <a class="nav-item" href="profile.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          我的
+        </a>
+      </nav>
     </div><!-- /screen-publish -->
 
-    <!-- ═══════════════════════════════════════════════
-    SCREEN 3: SUCCESS (发布成功)
-    ════════════════════════════════════════════════ -->
+    <!-- SCREEN: SUCCESS (发布成功) -->
     <div class="screen right" id="screen-success">
       <div class="success-body">
         <div class="success-icon">
@@ -871,58 +625,72 @@ body {
           返回首页
         </button>
       </div>
+
+      <!-- Bottom Nav (success page) -->
+      <nav class="bottom-nav" aria-label="主导航">
+        <a class="nav-item" href="home-glassmorphism.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          首页
+        </a>
+        <a class="nav-item" href="discover.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          发现
+        </a>
+        <a class="nav-item center" href="publish-post-flow.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span style="visibility:hidden;height:0;">发布</span>
+        </a>
+        <a class="nav-item" href="messages.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          消息
+        </a>
+        <a class="nav-item" href="profile.html">
+          <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          我的
+        </a>
+      </nav>
     </div><!-- /screen-success -->
 
   </div><!-- /screens -->
 
-
-<!-- ANNOTATION PINS — inside phone. Toggle with "DN" button. -->
+<!-- ANNOTATION PINS -->
 <button class="anno-toggle" id="anno-toggle" title="切换交互标注">DN</button>
-<div class="anno-pin" id="ap1" style="top:172px;left:16px;" data-anno="1">1</div>
-<div class="anno-pin" id="ap2" style="top:118px;left:44px;" data-anno="2">2</div>
-<div class="anno-pin" id="ap3" style="top:198px;left:44px;" data-anno="2">3</div>
+<div class="anno-pin" id="ap1" style="top:100px;left:16px;" data-anno="1">1</div>
+<div class="anno-pin" id="ap2" style="top:198px;left:44px;" data-anno="2">2</div>
+<div class="anno-pin" id="ap3" style="top:278px;left:44px;" data-anno="2">3</div>
 <div class="anno-pin" id="ap4" style="bottom:142px;left:50%;margin-left:-10px;" data-anno="2">4</div>
-<div class="anno-pin" id="ap5" style="top:308px;right:40px;" data-anno="2">5</div>
-<div class="anno-pin" id="ap6" style="top:118px;right:48px;" data-anno="6">6</div>
-<div class="anno-pin" id="ap7" style="bottom:14px;left:50%;margin-left:-10px;" data-anno="7">7</div>
+<div class="anno-pin" id="ap5" style="bottom:200px;right:40px;" data-anno="2">5</div>
+<div class="anno-pin" id="ap6" style="bottom:80px;left:50%;margin-left:-10px;" data-anno="3">6</div>
 <div class="anno-tooltip" id="anno-tooltip">
   <button class="at-close" id="at-close" aria-label="关闭">&times;</button>
   <div id="at-content"></div>
 </div>
 </div><!-- /phone -->
 
-<!-- ================================================================
-     INTERACTION LOGIC
-     ================================================================ -->
 <script>
 /* =====================================================================
    ANNOTATION SYSTEM — Developer Handoff Notes
    ===================================================================== */
 var annoData={
   1:{title:"发布流程入口",zones:[
-    ["触发方式","两条路径：1) 首页/其他页底部蓝色 + 按钮 → publish-post-flow.html#publish。2) 本页内置首页模拟 → 点击帖子卡片（占位）→ 进入发布流程。"],
-    ["Hash 路由","URL #publish 哈希触发 directEntry=true，跳过模拟首页直接展示发布表单。用户从外部页面点 + 按钮跳入时生效。"],
-    ["状态重置","每次进入发布页调用 goToPublish()，重置：清空标题/正文、清除标签选中、重置上传预览、恢复发布按钮。无草稿保存。"]
+    ["触发方式","所有页面底部蓝色 + 按钮 → publish-post-flow.html。发布页为独立全屏页面，提供专注的输入体验。"],
+    ["返回导航","点击返回箭头 → history.back() 回到上一页。若无法返回（直接打开），则跳转到首页。"],
+    ["状态重置","每次进入页面时自动重置表单：清空标题/正文、清除标签选中、重置上传预览、恢复发布按钮。无草稿保存。"]
   ]},
   2:{title:"发布表单",zones:[
-    ["标题输入","#inputTitle，maxlength=60。校验：非空 + 去除首尾空格后长度>0。失败 → 红色 border + error 提示。「V2：添加字数计数器」。"],
+    ["标题输入","#inputTitle，maxlength=60。校验：非空 + 去除首尾空格后长度>0。失败 → 红色 border + error 提示。V2：添加字数计数器。"],
     ["正文输入","#inputDesc textarea。校验：非空。支持换行（Enter 不触发提交）。失败 → 红色 border + error 提示。"],
     ["图片上传","点击上传区 → simulateUpload() 显示 1 张模拟图片。V1 仅模拟单张；V2：真实文件选择 + 多图 + 裁剪。"],
-    ["标签选择","8 个分类标签：失真/过载/延迟/混响/周边/综合/设备展示/求助。多选，点击 toggleTag() 切换 selected class。需至少选 1 个。若未选则默认选第一个（失真）。"],
-    ["发布按钮","#btnPublish — 点击 → submitPublish()。校验失败 → 不提交。提交中 → disabled + 文字替换为 spinner。V1 模拟 1.2s 延迟；V2：对接 POST API。"],
-    ["提交状态机","编辑态 → 校验失败（显示错误，可修改重试）→ 提交中（按钮 loading，不可编辑）→ 成功（跳转成功页，2.5s 后回首页）/ 失败（网络覆盖层，可重试或取消）。"]
+    ["标签选择","8 个风格标签。多选，点击 toggleTag() 切换 selected class。选填。"],
+    ["发布按钮","点击 → submitPublish()。校验失败 → toast 提示。提交中 → disabled + spinner。V1 模拟 1.2s 延迟；V2：对接 POST API。"],
+    ["提交状态机","编辑态 → 校验失败（显示错误，可修改重试）→ 提交中（按钮 loading）→ 成功（跳转成功页，2.5s 后回首页）/ 失败（网络覆盖层，可重试或取消）。"]
   ]},
-  6:{title:"网络失败兜底",zones:[
+  3:{title:"网络失败兜底",zones:[
     ["触发","V1 演示用：每次调用 submitPublish() 交替切换成功/失败（networkSimulated toggle）。V2：根据实际 HTTP 响应判断。"],
-    ["覆盖层","半透明遮罩 + 错误卡片：「网络连接失败」+ 原因说明 + 取消/重试 按钮。"],
-    ["重试","retryPublish() → 关闭覆盖层 → 再次 submitPublish()。V1：重试必然成功（toggle 翻转）。V2：重新发送 HTTP 请求。"],
+    ["覆盖层","半透明遮罩 + 错误卡片：「网络连接失败」+ 取消/重试 按钮。"],
+    ["重试","retryPublish() → 关闭覆盖层 → 再次 submitPublish()。V1：重试必然成功。"],
     ["取消","dismissNetworkError() → 关闭覆盖层 + 恢复发布按钮。表单内容保留，用户可修改后重试。"],
-    ["V2 增强","1) 自动草稿保存（localStorage）。2) 后台重试队列（网络恢复后自动提交）。3) 区分网络错误 vs 服务端错误（不同提示文案）。"]
-  ]},
-  7:{title:"底部导航栏 — 中心发布按钮",zones:[
-    ["交互","点击 → 跳转 publish-post-flow.html#publish。所有页面一致。"],
-    ["当前页行为","已在发布页时点击 → 重置表单并回到编辑态（goToPublish()）。"],
-    ["权限（V2）","未登录 → 跳转登录页。被禁言 → 提示「账号已被禁言」。"]
+    ["V2 增强","1) 自动草稿保存（localStorage）。2) 后台重试队列。3) 区分网络错误 vs 服务端错误。"]
   ]}
 };
 (function(){
@@ -964,52 +732,45 @@ document.addEventListener('click',function(e){
   }
 });
 })();
+
 /* ---- State ---- */
-let currentScreen = 'home';
+let currentScreen = 'publish';
 let publishLoading = false;
-let networkSimulated = false;   // toggle for demo: force network error
-let directEntry = false;        // true when entered via #publish from homepage
+let networkSimulated = false;
 
 /* ---- Screen transitions ---- */
 function navigateTo(screenId) {
-  const screens = {
-    home: document.getElementById('screen-home'),
+  var screens = {
     publish: document.getElementById('screen-publish'),
     success: document.getElementById('screen-success'),
   };
-
-  // Deactivate all
-  Object.entries(screens).forEach(([id, el]) => {
+  Object.keys(screens).forEach(function(id) {
     if (id === screenId) {
-      el.className = 'screen active';
-    } else if (id === currentScreen) {
-      // Slide direction: going "forward" slides left, "back" slides right
-      const order = ['home', 'publish', 'success'];
-      const fromIdx = order.indexOf(currentScreen);
-      const toIdx = order.indexOf(screenId);
-      el.className = toIdx > fromIdx ? 'screen left' : 'screen right';
+      screens[id].className = 'screen active';
     } else {
-      el.className = 'screen right';
+      screens[id].className = 'screen right';
     }
   });
-
   currentScreen = screenId;
-
-  // Update flow dots
-  updateFlowDots(screenId);
 }
 
-function updateFlowDots(screenId) {
-  const dots = document.querySelectorAll('#flowDots .flow-dot');
-  const map = { home: 0, publish: 1, success: 2 };
-  dots.forEach((d, i) => {
-    d.classList.toggle('active', i <= (map[screenId] || 0));
-  });
+/* ---- Navigation ---- */
+function goBack() {
+  dismissToast();
+  // Use history.back() to return to the page the user came from
+  if (document.referrer && document.referrer !== window.location.href) {
+    history.back();
+  } else {
+    location.href = 'home-glassmorphism.html';
+  }
 }
 
-/* ---- Navigation actions ---- */
-function goToPublish() {
-  // Reset form
+function returnHomeFromSuccess() {
+  location.href = 'home-glassmorphism.html';
+}
+
+/* ---- Reset form (called on page load and when clicking center + button) ---- */
+function resetForm() {
   document.getElementById('inputTitle').value = '';
   document.getElementById('inputDesc').value = '';
   document.getElementById('inputTitle').classList.remove('error');
@@ -1017,36 +778,13 @@ function goToPublish() {
   document.getElementById('errorTitle').classList.remove('visible');
   document.getElementById('errorDesc').classList.remove('visible');
   document.getElementById('uploadPreview').style.display = 'none';
-  document.querySelectorAll('.tag-chip.selected').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.tag-chip.selected').forEach(function(c) { c.classList.remove('selected'); });
   document.getElementById('btnPublish').disabled = false;
   document.getElementById('btnPublishLabel').style.display = '';
   document.getElementById('btnSpinner').style.display = 'none';
   publishLoading = false;
   networkSimulated = false;
   dismissToast();
-
-  navigateTo('publish');
-}
-
-function goBackHome() {
-  dismissToast();
-  if (directEntry) { location.href = 'home-glassmorphism.html'; return; }
-  navigateTo('home');
-}
-
-function returnHomeFromSuccess() {
-  if (directEntry) { location.href = 'home-glassmorphism.html'; return; }
-  navigateTo('home');
-}
-
-/* ---- Home tab switch ---- */
-function switchTab(el) {
-  document.querySelectorAll('.home-tab').forEach(t => {
-    t.classList.remove('active');
-    t.style.color = '#6b7280';
-  });
-  el.classList.add('active');
-  el.style.color = '#0870f7';
 }
 
 /* ---- Tag toggle ---- */
@@ -1060,9 +798,9 @@ function simulateUpload() {
 }
 
 /* ---- Toast ---- */
-let toastTimer = null;
+var toastTimer = null;
 function showToast(message, type) {
-  const toast = document.getElementById('toast');
+  var toast = document.getElementById('toast');
   toast.textContent = message;
   toast.className = 'toast toast-' + type + ' visible';
   clearTimeout(toastTimer);
@@ -1070,7 +808,7 @@ function showToast(message, type) {
 }
 
 function dismissToast() {
-  const toast = document.getElementById('toast');
+  var toast = document.getElementById('toast');
   toast.classList.remove('visible');
   clearTimeout(toastTimer);
 }
@@ -1087,14 +825,13 @@ function dismissNetworkError() {
 
 function retryPublish() {
   document.getElementById('networkOverlay').classList.remove('visible');
-  // Retry immediately
   submitPublish();
 }
 
 /* ---- Publish button helpers ---- */
 function setPublishLoading() {
   publishLoading = true;
-  const btn = document.getElementById('btnPublish');
+  var btn = document.getElementById('btnPublish');
   btn.disabled = true;
   document.getElementById('btnPublishLabel').style.display = 'none';
   document.getElementById('btnSpinner').style.display = 'inline-block';
@@ -1102,7 +839,7 @@ function setPublishLoading() {
 
 function resetPublishButton() {
   publishLoading = false;
-  const btn = document.getElementById('btnPublish');
+  var btn = document.getElementById('btnPublish');
   btn.disabled = false;
   document.getElementById('btnPublishLabel').style.display = '';
   document.getElementById('btnSpinner').style.display = 'none';
@@ -1110,12 +847,10 @@ function resetPublishButton() {
 
 /* ---- Validation ---- */
 function validateForm() {
-  let valid = true;
-  const title = document.getElementById('inputTitle').value.trim();
-  const desc = document.getElementById('inputDesc').value.trim();
-  const hasPhoto = document.getElementById('uploadPreview').style.display === 'block';
+  var valid = true;
+  var title = document.getElementById('inputTitle').value.trim();
+  var desc = document.getElementById('inputDesc').value.trim();
 
-  // Title
   if (!title) {
     document.getElementById('inputTitle').classList.add('error');
     document.getElementById('errorTitle').classList.add('visible');
@@ -1125,7 +860,6 @@ function validateForm() {
     document.getElementById('errorTitle').classList.remove('visible');
   }
 
-  // Description
   if (!desc) {
     document.getElementById('inputDesc').classList.add('error');
     document.getElementById('errorDesc').classList.add('visible');
@@ -1140,92 +874,65 @@ function validateForm() {
 
 /* ---- Submit ---- */
 function submitPublish() {
-  // Prevent double submit
   if (publishLoading) return;
 
-  // Validate
-  const valid = validateForm();
+  var valid = validateForm();
   if (!valid) {
     showToast('请填写所有必填项', 'error');
     return;
   }
 
-  // Toggle network simulation on every other submit (for demo)
+  // Toggle network simulation for demo (every other submit fails)
   networkSimulated = !networkSimulated;
 
   if (networkSimulated) {
-    // --- PATH C: Network Failure ---
     setPublishLoading();
-
-    // Simulate network delay then fail
-    setTimeout(() => {
+    setTimeout(function() {
       resetPublishButton();
       showNetworkOverlay();
     }, 1500);
-
   } else {
-    // --- PATH A: Normal Success ---
     setPublishLoading();
 
-    // Select first tag if none selected (for demo)
-    const tags = document.querySelectorAll('.tag-chip.selected');
+    var tags = document.querySelectorAll('.tag-chip.selected');
     if (tags.length === 0) {
       document.querySelector('.tag-chip').classList.add('selected');
     }
 
-    // Simulate API call
-    setTimeout(() => {
+    setTimeout(function() {
       resetPublishButton();
       navigateTo('success');
 
-      // Auto return to home after 2.5s
-      setTimeout(() => {
+      setTimeout(function() {
         if (currentScreen === 'success') {
-          if (directEntry) { location.href = 'home-glassmorphism.html'; return; }
-          navigateTo('home');
+          location.href = 'home-glassmorphism.html';
         }
       }, 2500);
     }, 1200);
   }
 }
 
-/* ---- Keyboard: Escape to go back ---- */
-document.addEventListener('keydown', (e) => {
+/* ---- Keyboard shortcuts ---- */
+document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     if (document.getElementById('networkOverlay').classList.contains('visible')) {
       dismissNetworkError();
     } else if (currentScreen === 'publish') {
-      goBackHome();
+      goBack();
     } else if (currentScreen === 'success') {
       returnHomeFromSuccess();
     }
   }
-  // Enter to submit on publish screen
   if (e.key === 'Enter' && currentScreen === 'publish' && !publishLoading) {
-    const activeEl = document.activeElement;
-    // Don't submit if focused on textarea (allow newlines)
+    var activeEl = document.activeElement;
     if (activeEl && activeEl.tagName === 'TEXTAREA') return;
     submitPublish();
   }
 });
 
-/* ---- Initialize ---- */
-if (window.location.hash === '#publish') {
-  // Direct entry from homepage — skip the internal home screen
-  directEntry = true;
-  navigateTo('publish');
-  window.location.hash = '';
-} else {
-  updateFlowDots('home');
-}
+/* ---- Init: reset form on every page load ---- */
+resetForm();
 </script>
-
-<!-- ================================================================
-     PROTOCOL LEGEND (visible on hover at bottom of phone)
-     ================================================================ -->
-<div style="position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);font-size:11px;color:#9ca3af;white-space:nowrap;text-align:center;">
-  板仓 PedalBoard · 发布帖子 Lo-Fi Prototype · Level 3
-</div>
 
 </body>
 </html>
